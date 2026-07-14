@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPublicProfile } from "@/lib/profile";
 import { isDatabaseConfigured } from "@/db";
@@ -5,6 +6,44 @@ import { isDatabaseConfigured } from "@/db";
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const profile = isDatabaseConfigured ? await getPublicProfile(Number(id)) : null;
+  if (!profile) {
+    return {
+      title: "پروفایل کاربر | VibeLab",
+      description: "پروفایل عمومی سازنده در VibeLab.",
+    };
+  }
+  return {
+    title: `${profile.fullName} | ${profile.headline} — VibeLab`,
+    description: profile.bio.slice(0, 160),
+    keywords: [profile.headline, profile.skills, "VibeLab", "پروفایل سازنده"],
+    alternates: {
+      canonical: `/profile/${id}`,
+    },
+    openGraph: {
+      type: "profile",
+      locale: "fa_IR",
+      url: `https://vibelab.ir/profile/${id}`,
+      title: `${profile.fullName} | ${profile.headline}`,
+      description: profile.bio.slice(0, 160),
+      images: [
+        {
+          url: "/og-profile.jpg",
+          width: 1200,
+          height: 630,
+          alt: `پروفایل ${profile.fullName} در VibeLab`,
+        },
+      ],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function PublicProfilePage({ params }: Props) {
   if (!isDatabaseConfigured) {

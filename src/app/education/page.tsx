@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import AvatarTool from "./avatar-tool";
 import "./education.css";
 
@@ -126,9 +127,48 @@ const freeCourses = [
   },
 ];
 
-export const metadata = {
-  title: 'مرکز آموزش VibeLab | دوره‌های رایگان AI و Vibe Coding',
-  description: 'منابع آموزشی رایگان هوش مصنوعی، Vibe Coding، ساخت آواتار یوتیوب و دوره‌های فارسی فرادرس.',
+export const metadata: Metadata = {
+  title: "مرکز آموزش VibeLab | دوره‌های رایگان AI و Vibe Coding",
+  description:
+    "منابع آموزشی رایگان هوش مصنوعی، Vibe Coding، ساخت آواتار یوتیوب با AI و دوره‌های فارسی فرادرس. یاد بگیر، بساز و رشد کن.",
+  keywords: [
+    "آموزش AI",
+    "دوره رایگان هوش مصنوعی",
+    "Vibe Coding",
+    "آموزش یوتیوب",
+    "آواتار یوتیوب",
+    "فرادرس",
+    "Coursera",
+    "DeepLearning.AI",
+    "Fast.ai",
+    "CS50",
+  ],
+  alternates: {
+    canonical: "/education",
+  },
+  openGraph: {
+    type: "website",
+    locale: "fa_IR",
+    url: "https://vibelab.ir/education",
+    title: "مرکز آموزش VibeLab | دوره‌های رایگان AI و Vibe Coding",
+    description:
+      "منابع آموزشی رایگان هوش مصنوعی، Vibe Coding، ساخت آواتار یوتیوب با AI و دوره‌های فارسی فرادرس.",
+    images: [
+      {
+        url: "/og-education.jpg",
+        width: 1200,
+        height: 630,
+        alt: "مرکز آموزش VibeLab - دوره‌های AI و Vibe Coding",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "مرکز آموزش VibeLab | دوره‌های رایگان AI و Vibe Coding",
+    description:
+      "منابع آموزشی رایگان هوش مصنوعی، Vibe Coding، ساخت آواتار یوتیوب با AI و دوره‌های فارسی فرادرس.",
+    images: ["/og-education.jpg"],
+  },
 };
 
 export default function EducationPage() {

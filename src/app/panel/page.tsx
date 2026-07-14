@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ensureDemoStudent, getStudentFromSession, STUDENT_COOKIE_NAME } from "@/lib/student";
@@ -8,6 +9,20 @@ import ProjectPanel from "./project-panel";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "پنل کاربر VibeLab | پروژه‌ها، رزومه و تحلیل AI",
+  description:
+    "پنل شخصی VibeLab برای مدیریت پروژه‌ها، آپلود و تحلیل رزومه با AI، ویرایش پروفایل و دریافت بازخورد تخصصی.",
+  keywords: ["پنل VibeLab", "تحلیل رزومه AI", "پروفایل حرفه‌ای", "پروژه‌های AI"],
+  alternates: {
+    canonical: "/panel",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function UserPanelPage() {
   if (!isDatabaseConfigured) {
