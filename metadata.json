@@ -1,0 +1,6 @@
+{
+  "name": "VibeLab AI Bootcamp",
+  "description": "VibeLab - AI Course Bootcamp Day 2 landing page with Immersive UI styling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
