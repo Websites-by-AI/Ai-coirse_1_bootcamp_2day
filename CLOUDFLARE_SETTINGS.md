@@ -1,25 +1,71 @@
-# Cloudflare vs Vercel
+# Cloudflare — تنظیمات درست برای این پروژه (OpenNext)
 
-## وضعیت شما
-- ✅ Vercel: https://ai-coirse-1-bootcamp-2day.vercel.app
-- ❌ Cloudflare Pages: fail چون `package-lock.json` روی GitHub نیست/خراب است
+این پروژه حالا با **@opennextjs/cloudflare** برای Cloudflare آماده است.
 
-Cloudflare error:
-```text
-The npm ci command can only install with an existing package-lock.json
+## مهم
+- سایت Node کامل روی **Vercel** هم کار می‌کند: https://ai-coirse-1-bootcamp-2day.vercel.app
+- برای Cloudflare باید از **Workers (OpenNext)** استفاده شود، نه output خام `.next`
+
+---
+
+## گزینه A (پیشنهادی): Cloudflare Workers via OpenNext + Git
+
+### Build settings در Cloudflare Dashboard
+| Field | Value |
+|------|--------|
+| **Build command** | `npx opennextjs-cloudflare build` |
+| **Deploy command** | `npx wrangler deploy` |
+| **Root directory** | *(empty)* |
+| **Node version** | `20` (`NODE_VERSION=20`) |
+| Install | `npm install --no-audit --no-fund` |
+
+> اگر UI فقط Pages-style دارد و Install/Deploy جدا ندارد:
+> Build command:
+> ```bash
+> npm install --no-audit --no-fund && npx opennextjs-cloudflare build && npx wrangler deploy
+> ```
+> Build output directory: **خالی / not used for Workers**
+
+### Runtime
+- Compatibility flags: `nodejs_compat`
+- **Root directory را `nodejs_compat` نگذار**
+- Secret به نام `nodejs_compat` نساز
+
+### Variables (اختیاری برای لندینگ)
+| Name | Required for landing |
+|------|----------------------|
+| `NODE_VERSION=20` | yes |
+| `DATABASE_URL` | no (demo mode) |
+| Google vars | no (optional) |
+
+---
+
+## گزینه B: فقط Vercel (ساده‌ترین)
+- همان repo
+- Framework Next.js
+- Build: `npm run build`
+- سایت: https://ai-coirse-1-bootcamp-2day.vercel.app
+
+---
+
+## فایل‌های لازم در GitHub
+حتماً push شوند:
+- `package.json`
+- `package-lock.json` (**کامل، نه خالی**)
+- `wrangler.jsonc`
+- `open-next.config.ts`
+- `public/_headers`
+- `src/**`
+- `scripts/fix-pg-cloudflare.mjs`
+
+بدون `package-lock.json` Cloudflare با `npm ci` می‌میرد.
+
+---
+
+## دستور محلی تست Cloudflare bundle
+```bash
+npm install
+npx opennextjs-cloudflare build
+# optional local worker preview:
+# npx opennextjs-cloudflare preview
 ```
-
-## توصیه
-از **Vercel** به‌عنوان سایت اصلی استفاده کنید.
-Cloudflare را فقط برای DNS دامنه بگذارید (اختیاری).
-
-اگر هنوز Cloudflare Pages می‌خواهید:
-1. `package-lock.json` کامل را از این پروژه روی GitHub آپلود کنید
-2. Install command = `npm install --no-audit --no-fund`
-3. Build command = `npm run build`
-4. Output = `.next`
-5. Root directory = empty
-6. NODE_VERSION = 20
-7. Runtime flag only: `nodejs_compat` (not secret, not root dir)
-
-حتی بعد از build موفق، Pages برای API/DB کامل مثل Vercel نیست.

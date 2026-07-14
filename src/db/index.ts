@@ -1,7 +1,14 @@
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
-import { Pool, type PoolConfig } from "pg";
+import type { Pool, PoolConfig } from "pg";
 
 export const isDatabaseConfigured = Boolean(process.env.DATABASE_URL?.trim());
+
+type DbGlobal = typeof globalThis & {
+  __vibelabPgPool?: Pool;
+  __vibelabDb?: NodePgDatabase;
+};
+
+const globalForDb = globalThis as DbGlobal;
 
 function buildPoolConfig(connectionString: string): PoolConfig {
   const isLocal =
@@ -24,50 +31,51 @@ function buildPoolConfig(connectionString: string): PoolConfig {
   };
 }
 
-type DbGlobal = typeof globalThis & {
-  __vibelabPgPool?: Pool;
-  __vibelabDb?: NodePgDatabase;
-};
-
-const globalForDb = globalThis as DbGlobal;
-
 function createDb() {
   const databaseUrl = process.env.DATABASE_URL?.trim();
   if (!databaseUrl) return null;
 
-  const pool =
-    globalForDb.__vibelabPgPool ?? new Pool(buildPoolConfig(databaseUrl));
-  const database = globalForDb.__vibelabDb ?? drizzle(pool);
+  // Cloudflare/OpenNext bundling cannot resolve pg's optional pg-cloudflare entry.
+  // Keep full Postgres support for Node hosts (Vercel/local). On Cloudflare, skip DB.
+  const isCloudflareWorker =
+    typeof (globalThis as { CloudFlare?: unknown }).CloudFlare !== "undefined" ||
+    process.env.CF_PAGES === "1" ||
+    process.env.CLOUDFLARE === "1" ||
+    process.env.NEXT_PUBLIC_FORCE_DEMO === "1";
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForDb.__vibelabPgPool = pool;
-    globalForDb.__vibelabDb = database;
+  if (isCloudflareWorker) return null;
+
+  try {
+    // Dynamic require keeps `pg` out of static OpenNext analysis when possible.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Pool } = require("pg") as typeof import("pg");
+    const pool = globalForDb.__vibelabPgPool ?? new Pool(buildPoolConfig(databaseUrl));
+    const database = globalForDb.__vibelabDb ?? drizzle(pool);
+
+    if (process.env.NODE_ENV !== "production") {
+      globalForDb.__vibelabPgPool = pool;
+      globalForDb.__vibelabDb = database;
+    }
+
+    return { pool, db: database };
+  } catch {
+    return null;
   }
-
-  return { pool, db: database };
 }
 
 const instance = createDb();
 
 export const pool = instance?.pool ?? null;
 
-/**
- * Lazy database accessor. Throws a friendly error only when a feature
- * actually needs the DB — importing this module never crashes the app.
- */
 export function getDb() {
   if (!instance?.db) {
     throw new Error(
-      "DATABASE_URL is not configured. Site runs in demo/preview mode without database features.",
+      "DATABASE_URL is not configured or database driver is unavailable in this runtime.",
     );
   }
   return instance.db;
 }
 
-/**
- * Backward-compatible export used across the codebase.
- * Accessing methods when DB is missing will throw at call-time, not import-time.
- */
 export const db = new Proxy({} as NodePgDatabase, {
   get(_target, property, receiver) {
     const real = getDb() as unknown as Record<PropertyKey, unknown>;

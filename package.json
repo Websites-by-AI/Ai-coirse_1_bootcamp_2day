@@ -8,10 +8,15 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "postinstall": "node -e \"process.stdout.write('')\"",
+    "postinstall": "node scripts/fix-pg-cloudflare.mjs",
     "cf:install": "npm install --no-audit --no-fund",
-    "cf:build": "npm run build",
-    "verify:lock": "node scripts/verify-lock.mjs"
+    "cf:build": "opennextjs-cloudflare build",
+    "verify:lock": "node scripts/verify-lock.mjs",
+    "pages:build": "opennextjs-cloudflare build",
+    "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy:cf": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "cloudflare-build": "npm install --no-audit --no-fund && opennextjs-cloudflare build"
   },
   "dependencies": {
     "clsx": "2.1.1",
@@ -20,11 +25,13 @@
     "next": "16.2.6",
     "nodemailer": "7.0.11",
     "pg": "8.20.0",
+    "pg-cloudflare": "1.4.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "tailwind-merge": "3.4.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.1",
     "@tailwindcss/postcss": "4.1.17",
     "@types/node": "22.19.15",
     "@types/nodemailer": "6.4.17",
@@ -36,9 +43,10 @@
     "eslint-config-next": "16.2.6",
     "postcss": "8.5.8",
     "tailwindcss": "4.1.17",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "wrangler": "4.110.0"
   },
   "engines": {
-    "node": "20.x"
+    "node": ">=20"
   }
 }

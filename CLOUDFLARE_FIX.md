@@ -1,46 +1,43 @@
-# Cloudflare Deploy Failure — Fixed Checklist
+# Cloudflare is now configured with OpenNext
 
-## Latest error (commit 250d9ce)
+## What changed
+- Added `@opennextjs/cloudflare` + `wrangler`
+- Added `wrangler.jsonc`, `open-next.config.ts`, `public/_headers`
+- Fixed `pg-cloudflare` bundling via `scripts/fix-pg-cloudflare.mjs`
+- Regenerated a full `package-lock.json` (required)
 
-```text
-npm ci can only install packages when package.json and package-lock.json are in sync
-Missing: next@16.2.6, @tailwindcss/postcss@4.1.17, drizzle-orm@0.45.2, ...
+## Cloudflare dashboard values
+
+| Field | Value |
+|------|--------|
+| Build command | `npx opennextjs-cloudflare build` |
+| Deploy command | `npx wrangler deploy` |
+| Root directory | empty |
+| NODE_VERSION | `20` |
+| Compatibility flag | `nodejs_compat` (Runtime only) |
+| Build output directory | *(leave empty for Workers)* |
+
+If your UI only has one build box, use:
+
+```bash
+npm install --no-audit --no-fund && npx opennextjs-cloudflare build && npx wrangler deploy
 ```
 
-### Fix applied in this workspace
-1. Regenerated a clean matching `package-lock.json`
-2. Pinned dependency versions (no caret mismatch)
-3. Kept Next.js scripts (`next build`, not `vite build`)
+## Must push to GitHub
+1. `package-lock.json` (**not empty**)
+2. `package.json`
+3. `wrangler.jsonc`
+4. `open-next.config.ts`
+5. `scripts/fix-pg-cloudflare.mjs`
+6. full `src/`
 
-### What you must push to GitHub
-These files **must** be on `main` together:
-- `package.json`
-- `package-lock.json`  ← critical
-- `src/**`
-- `next.config.ts`
-- `postcss.config.mjs`
-- `tsconfig.json`
+Without the lockfile, Cloudflare fails with:
+```text
+npm ci can only install with an existing package-lock.json
+```
 
-## Second problem: wrong Cloudflare build command
+## Vercel still works
+Keep using:
+https://ai-coirse-1-bootcamp-2day.vercel.app
 
-Your Pages settings:
-- Build command: `npx @cloudflare/next-on-pages@1`
-- Output: `/.vercel/output/static`
-
-`@cloudflare/next-on-pages` peer dependency only supports **Next <= 15.5.x**.  
-This project is **Next 16.2.6** and uses **PostgreSQL (`pg`)**, so Pages edge is the wrong runtime.
-
-## Correct deploy path
-Use Node host:
-- Build: `npm run build`
-- Start: `npm run start`
-- Install: `npm ci`
-- Env: see `CLOUDFLARE_SETTINGS.md`
-
-Use Cloudflare only as DNS/WAF/CDN in front of the Node host.
-
-## After push
-1. Cloudflare → Settings → Builds
-2. Change install to `npm ci`
-3. Prefer Vercel for the app itself
-4. Re-deploy
+Cloudflare will work only after this OpenNext setup is pushed and build command is changed away from raw `.next` output.

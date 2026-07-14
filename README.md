@@ -175,3 +175,14 @@ Status endpoint: `GET /api/auth/settings`
 Routes:
 - Start student Google: `/api/auth/student/google?returnTo=/panel`
 - Start admin Google: `/api/auth/google?returnTo=/admin`
+
+
+## Cloudflare (OpenNext)
+
+This repo includes OpenNext Cloudflare support:
+
+- Build: `npx opennextjs-cloudflare build`
+- Config: `wrangler.jsonc`, `open-next.config.ts`
+- See `CLOUDFLARE_SETTINGS.md`
+
+Primary production recommendation remains **Vercel** for full Postgres login features.
