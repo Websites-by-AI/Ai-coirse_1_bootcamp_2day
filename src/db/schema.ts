@@ -199,3 +199,18 @@ export const aiUsageEvents = pgTable("ai_usage_events", {
   source: varchar("source", { length: 100 }).notNull().default("application"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const educationCourses = pgTable("education_courses", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description").notNull().default(""),
+  provider: varchar("provider", { length: 40 }).notNull(),
+  url: varchar("url", { length: 500 }).notNull(),
+  thumbnailUrl: varchar("thumbnail_url", { length: 1000 }),
+  language: varchar("language", { length: 10 }).notNull().default("fa"),
+  isFree: integer("is_free").notNull().default(1),
+  category: varchar("category", { length: 60 }).notNull().default("general"),
+  externalId: varchar("external_id", { length: 120 }),
+  viewCount: integer("view_count").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});

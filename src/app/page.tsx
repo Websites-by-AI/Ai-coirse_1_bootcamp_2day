@@ -5,7 +5,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 type Theme = 'dark' | 'light' | 'aurora' | 'rose';
 type DayKey = 'one' | 'two';
 type ShareStatus = 'idle' | 'copied' | 'shared' | 'temporary';
-type IconName = 'arrow' | 'bolt' | 'brain' | 'calendar' | 'check' | 'chevron' | 'circle' | 'clapper' | 'code' | 'copy' | 'cursor' | 'globe' | 'image' | 'layers' | 'link' | 'menu' | 'moon' | 'play' | 'rocket' | 'share' | 'spark' | 'sun' | 'target' | 'tool' | 'users' | 'wand' | 'x';
+type IconName = 'arrow' | 'bolt' | 'brain' | 'calendar' | 'check' | 'chevron' | 'circle' | 'clapper' | 'code' | 'copy' | 'cursor' | 'globe' | 'image' | 'layers' | 'link' | 'mail' | 'menu' | 'moon' | 'play' | 'rocket' | 'share' | 'spark' | 'sun' | 'target' | 'tool' | 'upload' | 'users' | 'wand' | 'x';
 
 const icons: Record<IconName, ReactNode> = {
   arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
@@ -23,6 +23,7 @@ const icons: Record<IconName, ReactNode> = {
   image: <><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9" r="1.5" /><path d="m21 16-5-5L5 20" /></>,
   layers: <><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 16l9 5 9-5" /></>,
   link: <><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.2 1.2" /><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.2-1.2" /></>,
+  mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   moon: <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z" />,
   play: <path d="m9 7 7 5-7 5V7Z" />,
@@ -32,6 +33,7 @@ const icons: Record<IconName, ReactNode> = {
   sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
   target: <><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2" /></>,
   tool: <><path d="m14.7 6.3 3-3 3 3-3 3" /><path d="m17.7 6.3-8.4 8.4-4-4-2 2 4 4-3 3 3 3 3-3 4 4 2-2-4-4 8.4-8.4" /></>,
+  upload: <><path d="M12 16V4m-4 4 4-4 4 4M5 20h14" /></>,
   users: <><path d="M16 20v-1.5A3.5 3.5 0 0 0 12.5 15h-6A3.5 3.5 0 0 0 3 18.5V20" /><circle cx="9.5" cy="7" r="3.5" /><path d="M16 4.5a3.5 3.5 0 0 1 0 6.8m5 8.7v-1.5a3.5 3.5 0 0 0-2.6-3.4" /></>,
   wand: <><path d="m4 20 11-11M14 4l1 2m2 1 2 1m-8-3 1 2m2 1 2 1" /><path d="m5 14-1 1m3 2-1 1m-3-7 2 1" /></>,
   x: <path d="m6 6 12 12M18 6 6 18" />,
@@ -81,6 +83,7 @@ const outcomes = [
   { title: 'سیستم تولید محتوا', description: 'سناریو، استوری‌بورد، تصاویر و یک ویدیوی کوتاه برای برند یا ایده‌ی خودتان.', icon: 'clapper' as IconName, accent: 'coral' },
   { title: 'وب‌سایت یا مینی‌اپ', description: 'یک محصول تعاملی منتشرشده؛ ساخته‌شده با توضیح شما، نه با نوشتن کد.', icon: 'globe' as IconName, accent: 'blue' },
   { title: 'Prompt Playbook', description: 'پرامپت‌های آزموده‌شده برای تکرار، توسعه و تحویل پروژه به مشتری.', icon: 'spark' as IconName, accent: 'purple' },
+  { title: 'رزومه و تحلیل AI', description: 'رزومه حرفه‌ای با تحلیل هوشمندانه AI، امتیازدهی و بازخورد برای بهبود پروفایل.', icon: 'check' as IconName, accent: 'green' },
 ];
 
 export default function AcademyHome() {
@@ -131,6 +134,7 @@ export default function AcademyHome() {
     { href: '#tools', label: 'جعبه‌ابزار AI' },
     { href: '#syllabus', label: 'طرح درس دو روزه' },
     { href: '#outcomes', label: 'خروجی‌های شما' },
+    { href: '/education', label: 'مرکز آموزش' },
     { href: '/login', label: 'ورود' },
     { href: '/register', label: 'ثبت‌نام' },
     { href: '/panel', label: 'پنل کاربر' },
@@ -211,6 +215,37 @@ export default function AcademyHome() {
 
       <section id="outcomes" className="outcomes-section">
         <div className="vibe-container"><div className="section-intro centered"><div className="vibe-eyebrow coral"><Icon name="target" size={15} /> فقط آموزش نیست</div><h2>در پایان چه چیزی <span>دستت است؟</span></h2></div><div className="outcome-grid">{outcomes.map((outcome, index) => <article className={`outcome-card ${outcome.accent}`} key={outcome.title}><span className="outcome-number">۰{index + 1}</span><span className="outcome-icon"><Icon name={outcome.icon} size={24} /></span><h3>{outcome.title}</h3><p>{outcome.description}</p><span className="outcome-line" /></article>)}</div><div className="share-strip"><div className="share-strip-icon"><Icon name="share" size={21} /></div><div><b>لینک این صفحه را برای شریک یا هم‌تیمی‌ات بفرست.</b><p>روی «کپی لینک» بزن؛ لینک همین صفحه در کلیپ‌بوردت قرار می‌گیرد.</p></div><button onClick={sharePage}><Icon name={shareStatus === 'idle' ? 'copy' : 'check'} size={17} /> {shareStatus === 'temporary' ? 'لینک preview موقت است' : shareStatus === 'copied' ? 'لینک کپی شد' : shareStatus === 'shared' ? 'ارسال شد' : 'کپی لینک صفحه'}</button></div></div>
+      </section>
+
+      <section id="resume" className="resume-section">
+        <div className="vibe-container">
+          <div className="section-intro centered">
+            <div className="vibe-eyebrow"><Icon name="check" size={15} /> رزومه‌ساز هوشمند</div>
+            <h2>رزومه‌ات را <span>بساز و با AI تحلیل کن</span></h2>
+            <p>در پنل VibeLab، رزومه خود را آپلود کنید یا متن آن را وارد کنید. AI رزومه شما را تحلیل کرده، امتیاز می‌دهد و پیشنهادات بهبود ارائه می‌دهد.</p>
+          </div>
+          <div className="resume-features">
+            <div className="resume-feature-card">
+              <span><Icon name="upload" size={22} /></span>
+              <h3>آپلود رزومه</h3>
+              <p>فایل TXT، MD، PDF یا DOCX خود را آپلود کنید و به صورت خودکار متن استخراج شود.</p>
+            </div>
+            <div className="resume-feature-card">
+              <span><Icon name="spark" size={22} /></span>
+              <h3>تحلیل AI</h3>
+              <p>تحلیل هوشمندانه رزومه با OpenAI، Claude یا Gemini؛ امتیازدهی و بازخورد تخصصی.</p>
+            </div>
+            <div className="resume-feature-card">
+              <span><Icon name="mail" size={22} /></span>
+              <h3>ارسال ایمیل</h3>
+              <p>رزومه تحلیل‌شده را مستقیماً به ایمیل کارفرما یا مشتری ارسال کنید.</p>
+            </div>
+          </div>
+          <div className="resume-cta">
+            <a href="/panel" className="vibe-primary"><Icon name="spark" size={16} /> ورود به پنل و تحلیل رزومه</a>
+            <a href="/register" className="vibe-secondary">ثبت‌نام رایگان</a>
+          </div>
+        </div>
       </section>
 
       <section className="enroll-section"><div className="enroll-orb orb-a" /><div className="enroll-orb orb-b" /><div className="vibe-container enroll-content"><span className="enroll-mini-logo">V</span><h2>با یک ایده وارد شو؛<br />با یک <span>لینک واقعی</span> بیرون برو.</h2><p>VibeLab برای تولیدکننده‌ها، فریلنسرها، صاحبان کسب‌وکار و هر کسی است که می‌خواهد با هوش مصنوعی سریع‌تر بسازد.</p><div className="enroll-actions"><a href="/register" className="enroll-button">رزرو جایگاه و سنجش مسیر <Icon name="arrow" size={18} /></a><a href="https://t.me/+TrS3ViVv_zn3c8ls" className="enroll-telegram" target="_blank" rel="noreferrer"><Icon name="share" size={17} /> پیوستن به گروه آکادمی</a></div><div className="enroll-features"><span><Icon name="users" size={15} /> ظرفیت محدود برای بازخورد واقعی</span><i /><span><Icon name="globe" size={15} /> قابل شرکت به‌صورت آنلاین</span></div></div></section>
