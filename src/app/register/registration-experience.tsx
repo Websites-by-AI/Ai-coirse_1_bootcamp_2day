@@ -64,11 +64,11 @@ function resultSignals(assessment: NonNullable<Assessment>) {
   ];
 }
 
-export default function RegistrationExperience({ initialStudent, initialAssessment, turnstileSiteKey, googleEnabled }: { initialStudent: Student; initialAssessment: Assessment; turnstileSiteKey?: string; googleEnabled: boolean }) {
+export default function RegistrationExperience({ initialStudent, initialAssessment, turnstileSiteKey, googleEnabled, initialMode = "register" }: { initialStudent: Student; initialAssessment: Assessment; turnstileSiteKey?: string; googleEnabled: boolean; initialMode?: Mode }) {
   const router = useRouter();
   const registerFormRef = useRef<HTMLFormElement>(null);
   const loginFormRef = useRef<HTMLFormElement>(null);
-  const [mode, setMode] = useState<Mode>("register");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [theme, setTheme] = useState<JourneyTheme>("midnight");
   const [student, setStudent] = useState<Student>(initialStudent);
   const [assessment, setAssessment] = useState<Assessment>(initialAssessment);
@@ -83,18 +83,23 @@ export default function RegistrationExperience({ initialStudent, initialAssessme
   }, []);
 
   useEffect(() => {
-    const authError = new URLSearchParams(window.location.search).get("authError");
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("authError");
+    if (params.get("mode") === "login") setMode("login");
+    if (params.get("google") === "1" && !authError) {
+      setError("");
+    }
     if (!authError) return;
     const messages: Record<string, string> = {
-      google_not_configured: "ورود Google در محیط production هنوز پیکربندی نشده است.",
+      google_not_configured: "ورود Google هنوز پیکربندی نشده است. GOOGLE_CLIENT_ID و GOOGLE_CLIENT_SECRET را تنظیم کنید.",
       google_cancelled: "فرآیند ورود با Google لغو شد.",
       google_state_invalid: "اعتبارسنجی امنیتی ورود Google ناموفق بود؛ دوباره تلاش کنید.",
-      google_token_failed: "دریافت توکن Google ناموفق بود.",
-      google_profile_failed: "اطلاعات حساب Google قابل تأیید نبود.",
+      google_token_failed: "دریافت توکن Google ناموفق بود. Redirect URI را در Google Cloud بررسی کنید.",
+      google_profile_failed: "اطلاعات حساب Google قابل تأیید نبود (ایمیل باید verified باشد).",
       google_connection_failed: "ارتباط با Google برقرار نشد؛ دوباره تلاش کنید.",
     };
     setError(messages[authError] ?? "ورود با Google ناموفق بود.");
-    window.history.replaceState({}, "", "/register");
+    window.history.replaceState({}, "", window.location.pathname);
   }, []);
 
   const chooseTheme = (value: JourneyTheme) => {
@@ -206,6 +211,8 @@ export default function RegistrationExperience({ initialStudent, initialAssessme
       const result = (await response.json()) as { student?: Student; error?: string };
       if (!response.ok || !result.student) throw new Error(result.error ?? "ورود به حساب ناموفق بود.");
       setStudent(result.student);
+      // Prefer user panel after password login; assessment still available on /register.
+      router.replace("/panel");
       router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "ورود به حساب ناموفق بود.");
@@ -265,7 +272,29 @@ export default function RegistrationExperience({ initialStudent, initialAssessme
             <>
               <div className="journey-tabs"><button className={mode === "register" ? "active" : ""} onClick={() => { setMode("register"); setError(""); }}><JourneyIcon name="user" size={16} /> ساخت حساب و ارزیابی</button><button className={mode === "login" ? "active" : ""} onClick={() => { setMode("login"); setError(""); }}><JourneyIcon name="login" size={16} /> ورود به حساب</button></div>
               <button className="demo-account-button" onClick={openDemoAccount} disabled={demoLoading}><span><JourneyIcon name="spark" size={17} /></span><div><b>{demoLoading ? "در حال بازکردن حساب آزمایشی..." : "تست فوری با حساب دمو"}</b><small>نتیجه‌ی آماده، نمودار و داده‌ی واقعی PostgreSQL را ببینید.</small></div><JourneyIcon name="arrow" size={16} /></button>
-              {googleEnabled ? <a className="student-google-login" href="/api/auth/student/google"><span>G</span> ادامه با حساب Google</a> : <div className="student-google-login disabled"><span>G</span><div><b>ورود با حساب Google</b><small>پس از تنظیم کلیدهای Google OAuth فعال می‌شود.</small></div></div>}
+              {googleEnabled ? (
+                <a className="student-google-login" href={`/api/auth/student/google?returnTo=${encodeURIComponent(mode === "login" ? "/panel" : "/register")}`}>
+                  <span>G</span>
+                  {mode === "login" ? "ورود با حساب Google" : "ثبت‌نام / ادامه با حساب Google"}
+                </a>
+              ) : (
+                <div className="student-google-login disabled">
+                  <span>G</span>
+                  <div>
+                    <b>ورود و ثبت‌نام با Google</b>
+                    <small>GOOGLE_CLIENT_ID و GOOGLE_CLIENT_SECRET را در Environment Variables تنظیم کنید. Redirect URI: /api/auth/student/google/callback</small>
+                  </div>
+                </div>
+              )}
+              <div className="auth-setup-card">
+                <b>تنظیمات ورود کاربر</b>
+                <ul>
+                  <li>ورود با ایمیل/رمز: همیشه فعال</li>
+                  <li>ثبت‌نام با فرم: همیشه فعال</li>
+                  <li>Google Login/Register: {googleEnabled ? "فعال" : "نیازمند GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET"}</li>
+                  <li>حساب دمو: demo.student@vibelab.ir / VibeStudent2025!</li>
+                </ul>
+              </div>
               {mode === "login" ? (
                 <form ref={loginFormRef} className="journey-form login-form" onSubmit={submitLogin}>
                   <div className="journey-form-head"><span><JourneyIcon name="lock" size={19} /></span><div><p>حساب کاربری دارید؟</p><h2>نتیجه‌ی مسیرسنج را ببینید</h2></div><button type="button" className="fill-demo-button" onClick={fillDemoLogin}>پرکردن اطلاعات دمو</button></div>

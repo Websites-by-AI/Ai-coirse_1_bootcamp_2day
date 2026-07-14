@@ -1,8 +1,21 @@
 import { NextResponse } from "next/server";
 import { createStudentSession, registerStudent, STUDENT_COOKIE_NAME } from "@/lib/student";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { authCookieOptions } from "@/lib/auth-settings";
+import { isDatabaseConfigured } from "@/db";
 
 export async function POST(request: Request) {
+  if (!isDatabaseConfigured) {
+    return NextResponse.json(
+      {
+        error:
+          "ثبت‌نام واقعی بدون DATABASE_URL ممکن نیست. سایت در حالت نمایشی است؛ برای ذخیره حساب از Vercel + Supabase استفاده کنید.",
+        demoMode: true,
+      },
+      { status: 503 },
+    );
+  }
+
   try {
     const body = (await request.json()) as {
       fullName?: unknown;
@@ -40,7 +53,7 @@ export async function POST(request: Request) {
     });
     const session = await createStudentSession(result.student.id);
     const response = NextResponse.json({ ok: true, ...result });
-    response.cookies.set({ name: STUDENT_COOKIE_NAME, value: session.token, httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", expires: session.expiresAt, path: "/" });
+    response.cookies.set({ name: STUDENT_COOKIE_NAME, value: session.token, ...authCookieOptions(session.expiresAt) });
     return response;
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "ثبت‌نام انجام نشد؛ دوباره تلاش کنید." }, { status: 400 });

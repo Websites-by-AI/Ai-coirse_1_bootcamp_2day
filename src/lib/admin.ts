@@ -4,6 +4,11 @@ import { db } from "@/db";
 import { hashPassword, isModernPasswordHash, passwordMatches } from "@/lib/password";
 import { ensureDemoStudent } from "@/lib/student";
 import { adminSessions, adminUsers, enrollments, studentAssessments, studentUsers } from "@/db/schema";
+import {
+  googleAdminEmails as listGoogleAdminEmails,
+  isGoogleAdminAuthConfigured,
+  isGoogleOAuthConfigured as isGoogleOAuthConfiguredBase,
+} from "@/lib/auth-settings";
 
 export const ADMIN_COOKIE_NAME = "vibelab_admin_session";
 export const DEMO_ADMIN = {
@@ -44,18 +49,15 @@ export type GoogleIdentity = {
 };
 
 export function isGoogleOAuthConfigured() {
-  return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+  return isGoogleOAuthConfiguredBase();
 }
 
 export function isGoogleAuthConfigured() {
-  return Boolean(isGoogleOAuthConfigured() && process.env.GOOGLE_ADMIN_EMAILS);
+  return isGoogleAdminAuthConfigured();
 }
 
 function googleAdminEmails() {
-  return (process.env.GOOGLE_ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
+  return listGoogleAdminEmails();
 }
 
 export async function ensureDemoData() {

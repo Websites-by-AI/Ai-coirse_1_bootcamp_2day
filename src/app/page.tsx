@@ -131,6 +131,8 @@ export default function AcademyHome() {
     { href: '#tools', label: 'جعبه‌ابزار AI' },
     { href: '#syllabus', label: 'طرح درس دو روزه' },
     { href: '#outcomes', label: 'خروجی‌های شما' },
+    { href: '/login', label: 'ورود' },
+    { href: '/register', label: 'ثبت‌نام' },
     { href: '/panel', label: 'پنل کاربر' },
   ];
   const currentPlan = plans[activeDay];

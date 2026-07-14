@@ -1,3 +1,4 @@
+import { createDecipheriv, createHash } from "crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { aiProviderConfigs, aiUsageEvents } from "@/db/schema";
@@ -118,7 +119,7 @@ async function runAiAnalysis(provider: typeof aiProviderConfigs.$inferSelect, ap
 }
 
 function decryptStoredKey(ciphertext: string) {
-  const { createDecipheriv, createHash } = require("crypto") as typeof import("crypto");
+  
   const secret = process.env.AI_KEYS_ENCRYPTION_SECRET;
   if (!secret || secret.length < 32) throw new Error("AI vault پیکربندی نشده است.");
   const [ivValue, tagValue, encryptedValue] = ciphertext.split(".");
