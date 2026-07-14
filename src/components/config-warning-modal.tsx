@@ -6,7 +6,6 @@ import type { RuntimeIssue, RuntimeStatus } from "@/lib/runtime-status";
 const severityLabel: Record<RuntimeIssue["severity"], string> = {
   critical: "خطای مهم",
   warning: "هشدار",
-  info: "راهنما",
 };
 
 export default function ConfigWarningModal({
@@ -15,48 +14,37 @@ export default function ConfigWarningModal({
   initialStatus?: RuntimeStatus | null;
 }) {
   const [status, setStatus] = useState<RuntimeStatus | null>(initialStatus ?? null);
-  const [open, setOpen] = useState(Boolean(initialStatus?.issues?.length));
+  const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+
+    const apply = (runtime: RuntimeStatus) => {
+      if (cancelled) return;
+      setStatus(runtime);
+      // Only open modal when there is a real secret/DB problem.
+      if (runtime.issues.length > 0 && !dismissed) setOpen(true);
+      else setOpen(false);
+    };
+
     const load = async () => {
       try {
         const response = await fetch("/api/auth/settings", { cache: "no-store" });
         if (!response.ok) return;
-        const payload = (await response.json()) as {
-          runtime?: RuntimeStatus;
-        };
-        if (!cancelled && payload.runtime) {
-          setStatus(payload.runtime);
-          if (payload.runtime.issues.length && !dismissed) setOpen(true);
-        }
+        const payload = (await response.json()) as { runtime?: RuntimeStatus };
+        if (payload.runtime) apply(payload.runtime);
       } catch {
-        if (!cancelled) {
-          setStatus({
-            databaseConfigured: false,
-            databaseReachable: null,
-            googleStudentConfigured: false,
-            googleAdminConfigured: false,
-            siteUrlConfigured: false,
-            demoMode: true,
-            summary: "سایت در حالت نمایشی است؛ سرویس وضعیت در دسترس نبود.",
-            issues: [
-              {
-                id: "settings_api",
-                severity: "warning",
-                title: "API وضعیت در دسترس نیست",
-                detail:
-                  "احتمالاً روی Cloudflare Pages فقط خروجی استاتیک سرو می‌شود یا API اجرا نمی‌شود.",
-                fix: "برای لاگین/دیتابیس کامل از Vercel استفاده کنید. Root directory در Cloudflare باید خالی باشد نه nodejs_compat.",
-              },
-            ],
-          });
-          if (!dismissed) setOpen(true);
-        }
+        // Silent on optional status fetch failures when site is otherwise fine.
       }
     };
-    if (!initialStatus) void load();
+
+    if (initialStatus) {
+      apply(initialStatus);
+    } else {
+      void load();
+    }
+
     return () => {
       cancelled = true;
     };
@@ -68,6 +56,7 @@ export default function ConfigWarningModal({
     [issues],
   );
 
+  // No issues => no FAB, no modal.
   if (!status || issues.length === 0) return null;
 
   return (
@@ -80,7 +69,7 @@ export default function ConfigWarningModal({
           aria-label="نمایش هشدارهای پیکربندی"
         >
           {hasCritical ? "!" : "i"}
-          <span>هشدار پیکربندی</span>
+          <span>هشدار تنظیمات</span>
         </button>
       )}
 
@@ -95,8 +84,8 @@ export default function ConfigWarningModal({
           >
             <header>
               <div>
-                <p>CONFIGURATION WARNING</p>
-                <h2 id="config-warning-title">سایت باز است — بعضی سرویس‌ها کامل نیستند</h2>
+                <p>CONFIGURATION</p>
+                <h2 id="config-warning-title">یک یا چند Secret لازم تنظیم نشده</h2>
               </div>
               <button type="button" onClick={() => setOpen(false)} aria-label="بستن">
                 ×
@@ -104,34 +93,6 @@ export default function ConfigWarningModal({
             </header>
 
             <p className="config-warning-summary">{status.summary}</p>
-
-            <div className="config-warning-badges">
-              <span className={status.databaseConfigured ? "ok" : "bad"}>
-                DB: {status.databaseConfigured ? "تنظیم شده" : "نیست"}
-              </span>
-              <span
-                className={
-                  status.databaseReachable === true
-                    ? "ok"
-                    : status.databaseReachable === false
-                      ? "bad"
-                      : "warn"
-                }
-              >
-                اتصال DB:{" "}
-                {status.databaseReachable === true
-                  ? "موفق"
-                  : status.databaseReachable === false
-                    ? "ناموفق"
-                    : "بررسی نشده"}
-              </span>
-              <span className={status.googleStudentConfigured ? "ok" : "warn"}>
-                Google کاربر: {status.googleStudentConfigured ? "فعال" : "خاموش"}
-              </span>
-              <span className={status.demoMode ? "warn" : "ok"}>
-                {status.demoMode ? "حالت نمایشی" : "حالت کامل"}
-              </span>
-            </div>
 
             <ul className="config-warning-list">
               {issues.map((issue) => (
@@ -148,12 +109,6 @@ export default function ConfigWarningModal({
             </ul>
 
             <div className="config-warning-actions">
-              <a href="/api/auth/settings" target="_blank" rel="noreferrer">
-                وضعیت JSON
-              </a>
-              <a href="/api/health" target="_blank" rel="noreferrer">
-                health
-              </a>
               <button
                 type="button"
                 onClick={() => {
@@ -161,19 +116,9 @@ export default function ConfigWarningModal({
                   setOpen(false);
                 }}
               >
-                فهمیدم، ادامه بده
+                فهمیدم
               </button>
             </div>
-
-            <footer>
-              <p>
-                Cloudflare: Root directory را <b>خالی</b> بگذارید.{" "}
-                <code>nodejs_compat</code> فقط Compatibility Flag است، نه Root و نه Secret.
-              </p>
-              <p>
-                برای دیتابیس/لاگین واقعی: <b>Vercel + Supabase</b> — نه Secrets اجباری روی Pages.
-              </p>
-            </footer>
           </div>
         </div>
       )}

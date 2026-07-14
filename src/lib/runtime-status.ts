@@ -1,6 +1,6 @@
 export type RuntimeIssue = {
   id: string;
-  severity: "critical" | "warning" | "info";
+  severity: "critical" | "warning";
   title: string;
   detail: string;
   fix: string;
@@ -21,6 +21,11 @@ function has(value?: string | null) {
   return Boolean(value && value.trim());
 }
 
+/**
+ * Only real blocking/missing production secrets become modal issues.
+ * Optional Google / site URL hints are available via /api/auth/settings JSON,
+ * but they must NOT open a popup on a working Vercel site.
+ */
 export function getRuntimeStatus(options?: {
   databaseReachable?: boolean | null;
 }): RuntimeStatus {
@@ -38,66 +43,27 @@ export function getRuntimeStatus(options?: {
     issues.push({
       id: "database_missing",
       severity: "warning",
-      title: "دیتابیس هنوز وصل نیست",
+      title: "DATABASE_URL تنظیم نشده",
       detail:
-        "DATABASE_URL تنظیم نشده است. سایت و صفحات نمایشی باز می‌شوند، ولی ورود/ثبت‌نام/پنل واقعی ذخیره نمی‌شود.",
-      fix: "برای حالت کامل، اپ را روی Vercel ببرید و DATABASE_URL سوپابیس را آنجا بگذارید. روی Cloudflare Pages لازم نیست.",
+        "سایت باز است، ولی ورود/ثبت‌نام/پنل بدون دیتابیس ذخیره نمی‌شود.",
+      fix: "در Vercel → Settings → Environment Variables مقدار DATABASE_URL (Supabase) را بگذارید.",
     });
   } else if (databaseReachable === false) {
     issues.push({
       id: "database_unreachable",
       severity: "critical",
-      title: "اتصال به دیتابیس برقرار نشد",
-      detail: "DATABASE_URL هست، ولی سرور به PostgreSQL وصل نشد (SSL، رمز، یا host اشتباه).",
-      fix: "Connection string سوپابیس (pooler port 6543) را بررسی کنید و DATABASE_SSL=true بگذارید.",
+      title: "اتصال دیتابیس ناموفق است",
+      detail: "DATABASE_URL هست، ولی PostgreSQL در دسترس نیست.",
+      fix: "Connection string سوپابیس (pooler port 6543) و DATABASE_SSL=true را بررسی کنید.",
     });
   }
-
-  if (!googleStudentConfigured) {
-    issues.push({
-      id: "google_student",
-      severity: "info",
-      title: "ورود Google کاربر غیرفعال است",
-      detail: "GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET تنظیم نشده‌اند. ورود ایمیل/رمز و حساب دمو کار می‌کند.",
-      fix: "در Google Cloud یک OAuth Web Client بسازید و کلیدها را فقط روی Vercel ست کنید.",
-    });
-  }
-
-  if (!googleAdminConfigured) {
-    issues.push({
-      id: "google_admin",
-      severity: "info",
-      title: "ورود Google ادمین غیرفعال است",
-      detail: "برای ادمین علاوه بر OAuth باید GOOGLE_ADMIN_EMAILS هم ست شود.",
-      fix: "GOOGLE_ADMIN_EMAILS=you@gmail.com را در Vercel اضافه کنید.",
-    });
-  }
-
-  if (!siteUrlConfigured) {
-    issues.push({
-      id: "site_url",
-      severity: "info",
-      title: "آدرس عمومی سایت مشخص نیست",
-      detail: "NEXT_PUBLIC_SITE_URL خالی است. برای redirectهای Google بهتر است ست شود.",
-      fix: "مثلاً https://your-app.vercel.app",
-    });
-  }
-
-  issues.push({
-    id: "cloudflare_root",
-    severity: "warning",
-    title: "تنظیم Root directory در Cloudflare",
-    detail:
-      "Root directory نباید nodejs_compat باشد. آن یک Compatibility Flag است نه پوشه پروژه.",
-    fix: "Cloudflare Pages → Settings → Build → Root directory را خالی بگذارید. nodejs_compat را فقط در Runtime → Compatibility flags فعال کنید.",
-  });
 
   const critical = issues.some((i) => i.severity === "critical");
   const demoMode = !databaseConfigured || databaseReachable === false;
   const summary = critical
-    ? "سایت در حالت نمایشی با خطای اتصال اجرا می‌شود."
+    ? "سایت بالا است ولی دیتابیس وصل نیست."
     : demoMode
-      ? "سایت در حالت نمایشی/بدون دیتابیس باز است."
+      ? "سایت در حالت بدون دیتابیس است."
       : "پیکربندی پایه آماده است.";
 
   return {

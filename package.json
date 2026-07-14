@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "postinstall": "node -e \"console.log('VibeLab deps ready')\"",
+    "postinstall": "node -e \"process.stdout.write('')\"",
     "cf:install": "npm install --no-audit --no-fund",
     "cf:build": "npm run build",
     "verify:lock": "node scripts/verify-lock.mjs"
@@ -39,6 +39,6 @@
     "typescript": "5.9.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": "20.x"
   }
 }
