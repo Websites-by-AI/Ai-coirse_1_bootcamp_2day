@@ -1,20 +1,8 @@
 import { NextResponse } from "next/server";
 import { authenticateStudent, createStudentSession, STUDENT_COOKIE_NAME } from "@/lib/student";
 import { authCookieOptions } from "@/lib/auth-settings";
-import { isDatabaseConfigured } from "@/db";
 
 export async function POST(request: Request) {
-  if (!isDatabaseConfigured) {
-    return NextResponse.json(
-      {
-        error:
-          "دیتابیس تنظیم نشده است. سایت در حالت نمایشی است. برای ورود واقعی DATABASE_URL را روی Vercel/Supabase ست کنید.",
-        demoMode: true,
-      },
-      { status: 503 },
-    );
-  }
-
   try {
     const body = (await request.json()) as { email?: unknown; password?: unknown };
     if (typeof body.email !== "string" || typeof body.password !== "string") {

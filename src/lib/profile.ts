@@ -1,8 +1,9 @@
 import nodemailer from "nodemailer";
 import { and, desc, eq } from "drizzle-orm";
-import { db } from "@/db";
+import { db, hasDatabaseDriver } from "@/db";
 import { projectAnalyses, studentProfiles, studentProjects, studentResumes, studentUsers, resumeEmails } from "@/db/schema";
 import { runConfiguredAiJson } from "@/lib/ai";
+import { ensureDemoProfile, ensureDemoResumeRecord, getDemoStore, saveDemoStore } from "@/lib/demo-store";
 
 export type ProfileView = { headline: string; bio: string; skills: string; portfolioUrl: string | null; isPublic: boolean };
 export type ResumeView = { fileName: string | null; mimeType: string | null; contentText: string; score: number; review: string; analysisSource: string; updatedAt: string | null };
@@ -22,7 +23,16 @@ function toResume(row?: typeof studentResumes.$inferSelect): ResumeView {
   return { fileName: row?.fileName ?? null, mimeType: row?.mimeType ?? null, contentText: row?.contentText ?? "", score: row?.score ?? 0, review: row?.review ?? "", analysisSource: row?.analysisSource ?? "not_analyzed", updatedAt: row?.updatedAt?.toISOString() ?? null };
 }
 
+function toDemoProfile(row: ReturnType<typeof ensureDemoProfile>): ProfileView {
+  return { headline: row.headline, bio: row.bio, skills: row.skills, portfolioUrl: row.portfolioUrl, isPublic: row.isPublic };
+}
+
+function toDemoResume(row?: ReturnType<typeof ensureDemoResumeRecord>): ResumeView {
+  return { fileName: row?.fileName ?? null, mimeType: row?.mimeType ?? null, contentText: row?.contentText ?? "", score: row?.score ?? 0, review: row?.review ?? "", analysisSource: row?.analysisSource ?? "not_analyzed", updatedAt: row?.updatedAt ?? null };
+}
+
 export async function ensureStudentProfile(userId: number, fullName: string) {
+  if (!hasDatabaseDriver()) return ensureDemoProfile(userId, fullName) as never;
   const [existing] = await db.select().from(studentProfiles).where(eq(studentProfiles.userId, userId)).limit(1);
   if (existing) return existing;
   const [created] = await db.insert(studentProfiles).values({ userId, ...defaultProfile(fullName) }).returning();
@@ -30,6 +40,11 @@ export async function ensureStudentProfile(userId: number, fullName: string) {
 }
 
 export async function ensureDemoResume(userId: number, fullName: string) {
+  if (!hasDatabaseDriver()) {
+    ensureDemoProfile(userId, fullName);
+    ensureDemoResumeRecord(userId, fullName);
+    return;
+  }
   await ensureStudentProfile(userId, fullName);
   const [existing] = await db.select({ id: studentResumes.id }).from(studentResumes).where(eq(studentResumes.userId, userId)).limit(1);
   if (existing) return;
@@ -40,12 +55,28 @@ export async function ensureDemoResume(userId: number, fullName: string) {
 }
 
 export async function getStudentProfileData(userId: number, fullName: string) {
+  if (!hasDatabaseDriver()) {
+    const profile = ensureDemoProfile(userId, fullName);
+    const resume = ensureDemoResumeRecord(userId, fullName);
+    return { profile: toDemoProfile(profile), resume: toDemoResume(resume) };
+  }
   const profile = await ensureStudentProfile(userId, fullName);
   const [resume] = await db.select().from(studentResumes).where(eq(studentResumes.userId, userId)).limit(1);
   return { profile: toProfile(profile), resume: toResume(resume) };
 }
 
 export async function updateStudentProfile(userId: number, fullName: string, input: Partial<ProfileView>) {
+  if (!hasDatabaseDriver()) {
+    const profile = ensureDemoProfile(userId, fullName);
+    if (typeof input.headline === "string") profile.headline = input.headline.trim().slice(0, 180) || "سازنده‌ی محصول با AI";
+    if (typeof input.bio === "string") profile.bio = input.bio.trim().slice(0, 3_000);
+    if (typeof input.skills === "string") profile.skills = input.skills.trim().slice(0, 1_200);
+    if (typeof input.portfolioUrl === "string") profile.portfolioUrl = input.portfolioUrl.trim() || null;
+    if (typeof input.isPublic === "boolean") profile.isPublic = input.isPublic;
+    profile.updatedAt = new Date().toISOString();
+    saveDemoStore();
+    return toDemoProfile(profile);
+  }
   await ensureStudentProfile(userId, fullName);
   const values: Partial<typeof studentProfiles.$inferInsert> = { updatedAt: new Date() };
   if (typeof input.headline === "string") values.headline = input.headline.trim().slice(0, 180) || "سازنده‌ی محصول با AI";
@@ -75,6 +106,25 @@ function parseAiResume(content: string, fallback: ReturnType<typeof fallbackResu
 }
 
 export async function analyzeAndSaveResume(userId: number, fullName: string, input: { profile: ProfileView; resumeText: string }) {
+  if (!hasDatabaseDriver()) {
+    const profile = await updateStudentProfile(userId, fullName, input.profile);
+    const text = input.resumeText.trim().slice(0, 15_000);
+    const fallback = fallbackResumeAnalysis(profile, text);
+    const ai = await runConfiguredAiJson(`رزومه‌ی یک سازنده‌ی محصول AI را فقط برای بهبود ارائه‌ی حرفه‌ای بررسی کن. پاسخ فقط JSON باشد: {"score":0-100,"review":"متن فارسی کاربردی، بدون ادعای استخدام یا تضمین"}. نام: ${fullName}\nعنوان: ${profile.headline}\nمعرفی: ${profile.bio}\nمهارت‌ها: ${profile.skills}\nلینک نمونه‌کار: ${profile.portfolioUrl ?? "ندارد"}\nمتن رزومه: ${text}`, "resume_review").catch(() => null);
+    const result = ai ? parseAiResume(ai.content, fallback) : fallback;
+    const store = getDemoStore();
+    let resume = store.resumes.find((item) => item.userId === userId);
+    if (!resume) {
+      resume = ensureDemoResumeRecord(userId, fullName);
+    }
+    resume.contentText = text;
+    resume.score = result.score;
+    resume.review = result.review;
+    resume.analysisSource = result.analysisSource;
+    resume.updatedAt = new Date().toISOString();
+    saveDemoStore();
+    return { profile, resume: toDemoResume(resume) };
+  }
   const profile = await updateStudentProfile(userId, fullName, input.profile);
   const text = input.resumeText.trim().slice(0, 15_000);
   const fallback = fallbackResumeAnalysis(profile, text);
@@ -90,6 +140,19 @@ export async function importResumeFile(userId: number, fullName: string, file: F
   if (file.size === 0 || file.size > MAX_RESUME_BYTES) throw new Error("فایل رزومه باید بین ۱ بایت تا ۵ مگابایت باشد.");
   const allowed = ["text/plain", "text/markdown", "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
   if (!allowed.includes(file.type) && !/\.(txt|md|pdf|docx)$/i.test(file.name)) throw new Error("فقط فایل‌های TXT، MD، PDF و DOCX پذیرفته می‌شوند.");
+  if (!hasDatabaseDriver()) {
+    ensureDemoProfile(userId, fullName);
+    const data = Buffer.from(await file.arrayBuffer());
+    const isText = file.type.startsWith("text/") || /\.(txt|md)$/i.test(file.name);
+    const resume = ensureDemoResumeRecord(userId, fullName);
+    resume.fileName = file.name.slice(0, 255);
+    resume.mimeType = file.type || "application/octet-stream";
+    resume.fileData = data.toString("base64");
+    resume.contentText = (isText ? data.toString("utf8").slice(0, 15_000) : "") || resume.contentText || "";
+    resume.updatedAt = new Date().toISOString();
+    saveDemoStore();
+    return toDemoResume(resume);
+  }
   await ensureStudentProfile(userId, fullName);
   const data = Buffer.from(await file.arrayBuffer());
   const isText = file.type.startsWith("text/") || /\.(txt|md)$/i.test(file.name);
@@ -106,6 +169,11 @@ function smtpReady() {
 
 export async function emailStudentResume(userId: number, fullName: string, input: { recipient: string; subject: string; message: string }) {
   if (!/^\S+@\S+\.\S+$/.test(input.recipient)) throw new Error("ایمیل گیرنده معتبر نیست.");
+  if (!hasDatabaseDriver()) {
+    ensureDemoProfile(userId, fullName);
+    ensureDemoResumeRecord(userId, fullName);
+    return { status: "queued_demo_mode", detail: "در حالت بدون دیتابیس/SMTP، درخواست ارسال رزومه به صورت نمایشی ثبت شد. برای ارسال واقعی SMTP و دیتابیس را تنظیم کنید." };
+  }
   const [profile] = await db.select().from(studentProfiles).where(eq(studentProfiles.userId, userId)).limit(1);
   const [resume] = await db.select().from(studentResumes).where(eq(studentResumes.userId, userId)).limit(1);
   if (!profile || !resume) throw new Error("ابتدا پروفایل و رزومه را تکمیل کنید.");
@@ -127,6 +195,22 @@ export async function emailStudentResume(userId: number, fullName: string, input
 }
 
 export async function getPublicProfile(userId: number): Promise<PublicProfileView | null> {
+  if (!hasDatabaseDriver()) {
+    const store = getDemoStore();
+    const user = store.students.find((item) => item.id === userId);
+    const profile = store.profiles.find((item) => item.userId === userId);
+    if (!user || !profile || !profile.isPublic) return null;
+    const projects = store.projects.filter((project) => project.userId === userId);
+    return {
+      id: user.id,
+      fullName: user.fullName,
+      ...toDemoProfile(profile),
+      projects: projects.map((project) => {
+        const analysis = store.analyses.find((item) => item.projectId === project.id);
+        return { name: project.name, description: project.description, deploymentUrl: project.deploymentUrl, screenshotUrl: project.screenshotUrl, estimatedMin: analysis?.estimatedMin ?? null, estimatedMax: analysis?.estimatedMax ?? null };
+      }),
+    };
+  }
   const [user] = await db.select({ id: studentUsers.id, fullName: studentUsers.fullName }).from(studentUsers).where(eq(studentUsers.id, userId)).limit(1);
   const [profile] = await db.select().from(studentProfiles).where(eq(studentProfiles.userId, userId)).limit(1);
   if (!user || !profile || !profile.isPublic) return null;

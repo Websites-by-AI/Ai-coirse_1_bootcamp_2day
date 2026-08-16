@@ -2,6 +2,13 @@ import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Pool, PoolConfig } from "pg";
 
 export const isDatabaseConfigured = Boolean(process.env.DATABASE_URL?.trim());
+export function hasDatabaseConfig() {
+  return Boolean(process.env.DATABASE_URL?.trim());
+}
+
+export function hasDatabaseDriver() {
+  return Boolean(instance?.db);
+}
 
 type DbGlobal = typeof globalThis & {
   __vibelabPgPool?: Pool;

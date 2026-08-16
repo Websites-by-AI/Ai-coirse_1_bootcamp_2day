@@ -1,11 +1,26 @@
 import { randomBytes } from "crypto";
 import { and, desc, eq, gt } from "drizzle-orm";
-import { db } from "@/db";
+import { db, hasDatabaseDriver } from "@/db";
 import { enrollments, studentAssessments, studentSessions, studentUsers } from "@/db/schema";
 import { hashPassword, isModernPasswordHash, passwordMatches } from "@/lib/password";
 import { assessStudentFit, type AssessmentInput, type AssessmentResult } from "@/lib/assessment";
 import { ensureDemoProject } from "@/lib/projects";
 import { ensureDemoResume } from "@/lib/profile";
+import {
+  authenticateDemoStudent,
+  createDemoStudent,
+  deleteDemoSession,
+  ensureDemoProfile,
+  ensureDemoProjectRecord,
+  ensureDemoResumeRecord,
+  findDemoStudentByEmail,
+  getDemoStore,
+  getDemoStudentFromSession,
+  normalizeEmail,
+  saveDemoStore,
+  studentView,
+  upsertDemoSession,
+} from "@/lib/demo-store";
 
 export const STUDENT_COOKIE_NAME = "vibelab_student_session";
 export const DEMO_STUDENT = {
@@ -37,7 +52,57 @@ export type GoogleStudentIdentity = {
   name: string;
 };
 
+function demoAssessmentView(assessment: ReturnType<typeof getDemoStore>["assessments"][number]): StudentAssessmentView {
+  return {
+    id: assessment.id,
+    goal: assessment.goal,
+    experienceLevel: assessment.experienceLevel,
+    weeklyHours: assessment.weeklyHours,
+    projectIdea: assessment.projectIdea,
+    score: assessment.score,
+    fitLevel: assessment.fitLevel as AssessmentResult["fitLevel"],
+    recommendation: assessment.recommendation,
+    analysisSource: assessment.analysisSource === "ai" ? "ai" : "rule_based",
+    createdAt: assessment.createdAt,
+  };
+}
+
+async function ensureDemoStudentWithoutDatabase() {
+  let student = findDemoStudentByEmail(DEMO_STUDENT.email);
+  if (!student) student = createDemoStudent(DEMO_STUDENT);
+  const store = getDemoStore();
+  const existingAssessment = store.assessments.find((item) => item.userId === student.id);
+  if (!existingAssessment) {
+    const demoInput: AssessmentInput = {
+      goal: "ساخت وب‌سایت یا مینی‌اپ برای ایده‌ام",
+      experienceLevel: "با ابزارهای AI کمی کار کرده‌ام",
+      weeklyHours: 7,
+      projectIdea: "می‌خواهم برای یک کسب‌وکار خانگی، یک لندینگ ساده و یک ویدیوی کوتاه معرفی بسازم تا سفارش‌های محلی بیشتری دریافت کنم.",
+    };
+    const result = await assessStudentFit(demoInput);
+    store.assessments.push({
+      id: store.nextAssessmentId++,
+      userId: student.id,
+      goal: demoInput.goal,
+      experienceLevel: demoInput.experienceLevel,
+      weeklyHours: demoInput.weeklyHours,
+      projectIdea: demoInput.projectIdea,
+      score: result.score,
+      fitLevel: result.fitLevel,
+      recommendation: result.recommendation,
+      analysisSource: result.analysisSource,
+      createdAt: new Date().toISOString(),
+    });
+  }
+  ensureDemoProfile(student.id, student.fullName);
+  ensureDemoResumeRecord(student.id, student.fullName);
+  ensureDemoProjectRecord(student.id);
+  saveDemoStore();
+  return studentView(student);
+}
+
 export async function ensureDemoStudent() {
+  if (!hasDatabaseDriver()) return ensureDemoStudentWithoutDatabase();
   await db
     .insert(studentUsers)
     .values({
@@ -101,12 +166,17 @@ export async function ensureDemoStudent() {
 export async function createStudentSession(userId: number) {
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 14);
+  if (!hasDatabaseDriver()) {
+    upsertDemoSession(token, userId, expiresAt);
+    return { token, expiresAt };
+  }
   await db.insert(studentSessions).values({ token, userId, expiresAt });
   return { token, expiresAt };
 }
 
 export async function getStudentFromSession(token?: string): Promise<StudentProfile | null> {
   if (!token) return null;
+  if (!hasDatabaseDriver()) return getDemoStudentFromSession(token);
   const [student] = await db
     .select({
       id: studentUsers.id,
@@ -159,6 +229,10 @@ export async function authenticateGoogleStudent(identity: GoogleStudentIdentity)
 }
 
 export async function authenticateStudent(email: string, password: string): Promise<StudentProfile | null> {
+  if (!hasDatabaseDriver()) {
+    await ensureDemoStudentWithoutDatabase();
+    return authenticateDemoStudent(email, password);
+  }
   await ensureDemoStudent();
   const [student] = await db
     .select({ id: studentUsers.id, fullName: studentUsers.fullName, email: studentUsers.email, phone: studentUsers.phone, passwordHash: studentUsers.passwordHash })
@@ -174,10 +248,20 @@ export async function authenticateStudent(email: string, password: string): Prom
 
 export async function deleteStudentSession(token?: string) {
   if (!token) return;
+  if (!hasDatabaseDriver()) {
+    deleteDemoSession(token);
+    return;
+  }
   await db.delete(studentSessions).where(eq(studentSessions.token, token));
 }
 
 export async function getLatestStudentAssessment(userId: number): Promise<StudentAssessmentView | null> {
+  if (!hasDatabaseDriver()) {
+    const assessment = getDemoStore().assessments
+      .filter((item) => item.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+    return assessment ? demoAssessmentView(assessment) : null;
+  }
   const [assessment] = await db
     .select()
     .from(studentAssessments)
@@ -202,6 +286,29 @@ export async function getLatestStudentAssessment(userId: number): Promise<Studen
 export async function createAssessmentForStudent(userId: number, input: AssessmentInput) {
   if (input.projectIdea.trim().length < 15) throw new Error("ایده یا مسئله‌ی پروژه را کمی کامل‌تر بنویسید.");
   if (!Number.isInteger(input.weeklyHours) || input.weeklyHours < 1 || input.weeklyHours > 80) throw new Error("زمان هفتگی را بین ۱ تا ۸۰ ساعت وارد کنید.");
+
+  if (!hasDatabaseDriver()) {
+    const store = getDemoStore();
+    const student = store.students.find((item) => item.id === userId);
+    if (!student) throw new Error("حساب کاربری پیدا نشد.");
+    const analysis = await assessStudentFit(input);
+    const assessment = {
+      id: store.nextAssessmentId++,
+      userId,
+      goal: input.goal,
+      experienceLevel: input.experienceLevel,
+      weeklyHours: input.weeklyHours,
+      projectIdea: input.projectIdea,
+      score: analysis.score,
+      fitLevel: analysis.fitLevel,
+      recommendation: analysis.recommendation,
+      analysisSource: analysis.analysisSource,
+      createdAt: new Date().toISOString(),
+    };
+    store.assessments.push(assessment);
+    saveDemoStore();
+    return demoAssessmentView(assessment);
+  }
 
   const [student] = await db
     .select({ id: studentUsers.id, fullName: studentUsers.fullName, email: studentUsers.email, phone: studentUsers.phone })
@@ -258,6 +365,31 @@ export async function registerStudent(input: {
   if (input.password.length < 8) throw new Error("رمز عبور باید حداقل ۸ کاراکتر باشد.");
   if (input.assessment.projectIdea.trim().length < 15) throw new Error("ایده یا مسئله‌ی پروژه را کمی کامل‌تر بنویسید.");
   if (!Number.isInteger(input.assessment.weeklyHours) || input.assessment.weeklyHours < 1 || input.assessment.weeklyHours > 80) throw new Error("زمان هفتگی را بین ۱ تا ۸۰ ساعت وارد کنید.");
+
+  if (!hasDatabaseDriver()) {
+    if (findDemoStudentByEmail(email)) throw new Error("با این ایمیل قبلاً حساب کاربری ساخته شده است. از ورود استفاده کنید.");
+    const studentRecord = createDemoStudent({ fullName, email, phone, password: input.password });
+    const analysis = await assessStudentFit(input.assessment);
+    const store = getDemoStore();
+    const assessmentRecord = {
+      id: store.nextAssessmentId++,
+      userId: studentRecord.id,
+      goal: input.assessment.goal,
+      experienceLevel: input.assessment.experienceLevel,
+      weeklyHours: input.assessment.weeklyHours,
+      projectIdea: input.assessment.projectIdea,
+      score: analysis.score,
+      fitLevel: analysis.fitLevel,
+      recommendation: analysis.recommendation,
+      analysisSource: analysis.analysisSource,
+      createdAt: new Date().toISOString(),
+    };
+    store.assessments.push(assessmentRecord);
+    ensureDemoProfile(studentRecord.id, fullName);
+    ensureDemoResumeRecord(studentRecord.id, fullName);
+    saveDemoStore();
+    return { student: studentView(studentRecord), assessment: demoAssessmentView(assessmentRecord) };
+  }
 
   const [existing] = await db.select({ id: studentUsers.id }).from(studentUsers).where(eq(studentUsers.email, email)).limit(1);
   if (existing) throw new Error("با این ایمیل قبلاً حساب کاربری ساخته شده است. از ورود استفاده کنید.");

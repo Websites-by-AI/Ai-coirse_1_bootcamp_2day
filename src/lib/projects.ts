@@ -1,8 +1,9 @@
 import { lookup } from "dns/promises";
 import { and, desc, eq } from "drizzle-orm";
-import { db } from "@/db";
+import { db, hasDatabaseDriver } from "@/db";
 import { projectAnalyses, studentProjects } from "@/db/schema";
 import { runConfiguredAiJson } from "@/lib/ai";
+import { getDemoStore, saveDemoStore, type DemoProjectAnalysisRecord, type DemoProjectRecord } from "@/lib/demo-store";
 
 export type ProjectAnalysisView = { id: number; codeScore: number; productScore: number; marketScore: number; estimatedMin: number; estimatedMax: number; currency: string; report: string; scanSummary: string; analysisSource: string; createdAt: string };
 export type ProjectView = { id: number; name: string; description: string; githubUrl: string; deploymentUrl: string; screenshotUrl: string | null; lastScanStatus: string; lastScannedAt: string | null; createdAt: string; analysis: ProjectAnalysisView | null };
@@ -90,7 +91,41 @@ function toView(project: typeof studentProjects.$inferSelect, analysis?: typeof 
   return { id: project.id, name: project.name, description: project.description, githubUrl: project.githubUrl, deploymentUrl: project.deploymentUrl, screenshotUrl: project.screenshotUrl, lastScanStatus: project.lastScanStatus, lastScannedAt: project.lastScannedAt?.toISOString() ?? null, createdAt: project.createdAt.toISOString(), analysis: analysis ? { id: analysis.id, codeScore: analysis.codeScore, productScore: analysis.productScore, marketScore: analysis.marketScore, estimatedMin: analysis.estimatedMin, estimatedMax: analysis.estimatedMax, currency: analysis.currency, report: analysis.report, scanSummary: analysis.scanSummary, analysisSource: analysis.analysisSource, createdAt: analysis.createdAt.toISOString() } : null };
 }
 
+function toDemoView(project: DemoProjectRecord, analysis?: DemoProjectAnalysisRecord): ProjectView {
+  return {
+    id: project.id,
+    name: project.name,
+    description: project.description,
+    githubUrl: project.githubUrl,
+    deploymentUrl: project.deploymentUrl,
+    screenshotUrl: project.screenshotUrl,
+    lastScanStatus: project.lastScanStatus,
+    lastScannedAt: project.lastScannedAt,
+    createdAt: project.createdAt,
+    analysis: analysis ? {
+      id: analysis.id,
+      codeScore: analysis.codeScore,
+      productScore: analysis.productScore,
+      marketScore: analysis.marketScore,
+      estimatedMin: analysis.estimatedMin,
+      estimatedMax: analysis.estimatedMax,
+      currency: analysis.currency,
+      report: analysis.report,
+      scanSummary: analysis.scanSummary,
+      analysisSource: analysis.analysisSource,
+      createdAt: analysis.createdAt,
+    } : null,
+  };
+}
+
 export async function listStudentProjects(userId: number) {
+  if (!hasDatabaseDriver()) {
+    const store = getDemoStore();
+    return store.projects
+      .filter((project) => project.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .map((project) => toDemoView(project, store.analyses.find((analysis) => analysis.projectId === project.id)));
+  }
   const projects = await db.select().from(studentProjects).where(eq(studentProjects.userId, userId)).orderBy(desc(studentProjects.createdAt));
   const analyses = await db.select().from(projectAnalyses).orderBy(desc(projectAnalyses.createdAt));
   return projects.map((project) => toView(project, analyses.find((analysis) => analysis.projectId === project.id)));
@@ -100,11 +135,54 @@ export async function createStudentProject(userId: number, input: { name: string
   if (input.name.trim().length < 3 || input.description.trim().length < 20) throw new Error("نام پروژه و توضیح حداقل ۲۰ کاراکتری لازم است.");
   const github = await validatePublicUrl(input.githubUrl, true);
   const deployment = await validatePublicUrl(input.deploymentUrl);
+  if (!hasDatabaseDriver()) {
+    const store = getDemoStore();
+    const project: DemoProjectRecord = {
+      id: store.nextProjectId++,
+      userId,
+      name: input.name.trim(),
+      description: input.description.trim(),
+      githubUrl: github.toString(),
+      deploymentUrl: deployment.toString(),
+      screenshotUrl: null,
+      lastScanStatus: "pending",
+      lastScannedAt: null,
+      createdAt: new Date().toISOString(),
+    };
+    store.projects.push(project);
+    saveDemoStore();
+    return toDemoView(project);
+  }
   const [project] = await db.insert(studentProjects).values({ userId, name: input.name.trim(), description: input.description.trim(), githubUrl: github.toString(), deploymentUrl: deployment.toString() }).returning();
   return toView(project);
 }
 
 export async function scanStudentProject(userId: number, projectId: number) {
+  if (!hasDatabaseDriver()) {
+    const store = getDemoStore();
+    const project = store.projects.find((item) => item.id === projectId && item.userId === userId);
+    if (!project) throw new Error("پروژه پیدا نشد یا دسترسی ندارید.");
+    try {
+      const scan = await scanProject(project.githubUrl, project.deploymentUrl);
+      const fallback = fallbackAnalysis(project, scan);
+      const ai = await runConfiguredAiJson(`پروژه‌ی وب زیر را برای قیمت‌گذاری آموزشی تحلیل کن. فقط JSON معتبر بده: {"codeScore":0-100,"productScore":0-100,"marketScore":0-100,"estimatedMin":عدد تومان,"estimatedMax":عدد تومان,"report":"۳ تا ۵ جمله فارسی"}. نام: ${project.name}\nتوضیح: ${project.description}\nاسکن GitHub: ${scan.sourceFiles} فایل کد از ${scan.fileCount} فایل؛ تکنولوژی‌ها: ${scan.tech.join(", ") || "نامشخص"}; README: ${scan.readme}\nنسخه انتشار: status ${scan.siteStatus}; title: ${scan.siteTitle}; description: ${scan.siteDescription}`, "project_pricing_scan").catch(() => null);
+      const result = ai ? parseAi(ai.content, fallback) : fallback;
+      const summary = `GitHub: ${scan.owner}/${scan.repo} · ${scan.sourceFiles} فایل کد · ${scan.tech.join("، ") || "فناوری مشخص نشد"} · Deploy: ${scan.deploymentHost} (${scan.siteStatus})`;
+      const analysis: DemoProjectAnalysisRecord = { id: store.nextAnalysisId++, projectId: project.id, codeScore: result.codeScore, productScore: result.productScore, marketScore: result.marketScore, estimatedMin: result.estimatedMin, estimatedMax: result.estimatedMax, currency: "تومان", report: result.report, scanSummary: summary, analysisSource: result.analysisSource, createdAt: new Date().toISOString() };
+      store.analyses = store.analyses.filter((item) => item.projectId !== project.id);
+      store.analyses.push(analysis);
+      project.lastScanStatus = "completed";
+      project.lastScannedAt = new Date().toISOString();
+      project.screenshotUrl = screenshotUrlFor(project.deploymentUrl);
+      saveDemoStore();
+      return toDemoView(project, analysis);
+    } catch (error) {
+      project.lastScanStatus = "error";
+      project.lastScannedAt = new Date().toISOString();
+      saveDemoStore();
+      throw error;
+    }
+  }
   const [project] = await db.select().from(studentProjects).where(and(eq(studentProjects.id, projectId), eq(studentProjects.userId, userId))).limit(1);
   if (!project) throw new Error("پروژه پیدا نشد یا دسترسی ندارید.");
   try {
@@ -123,6 +201,11 @@ export async function scanStudentProject(userId: number, projectId: number) {
 }
 
 export async function ensureDemoProject(userId: number) {
+  if (!hasDatabaseDriver()) {
+    const { ensureDemoProjectRecord } = await import("@/lib/demo-store");
+    ensureDemoProjectRecord(userId);
+    return;
+  }
   const [existing] = await db.select({ id: studentProjects.id, screenshotUrl: studentProjects.screenshotUrl }).from(studentProjects).where(and(eq(studentProjects.userId, userId), eq(studentProjects.githubUrl, "https://github.com/vercel/next.js"))).limit(1);
   if (existing) {
     if (!existing.screenshotUrl) await db.update(studentProjects).set({ screenshotUrl: screenshotUrlFor("https://nextjs.org/") }).where(eq(studentProjects.id, existing.id));

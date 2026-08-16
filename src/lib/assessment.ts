@@ -1,6 +1,6 @@
 import { createDecipheriv, createHash } from "crypto";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { db, hasDatabaseDriver } from "@/db";
 import { aiProviderConfigs, aiUsageEvents } from "@/db/schema";
 
 export type AssessmentInput = {
@@ -143,6 +143,7 @@ function resolveKey(provider: typeof aiProviderConfigs.$inferSelect) {
 
 export async function assessStudentFit(input: AssessmentInput): Promise<AssessmentResult> {
   const fallback = ruleBasedAssessment(input);
+  if (!hasDatabaseDriver()) return fallback;
   const [provider] = await db
     .select()
     .from(aiProviderConfigs)
