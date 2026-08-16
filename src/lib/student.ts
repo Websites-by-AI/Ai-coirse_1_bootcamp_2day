@@ -20,6 +20,7 @@ import {
   saveDemoStore,
   studentView,
   upsertDemoSession,
+  createSignedDemoSessionToken,
 } from "@/lib/demo-store";
 
 export const STUDENT_COOKIE_NAME = "vibelab_student_session";
@@ -167,6 +168,12 @@ export async function createStudentSession(userId: number) {
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 14);
   if (!hasDatabaseDriver()) {
+    const student = getDemoStore().students.find((item) => item.id === userId);
+    if (student) {
+      const signedToken = createSignedDemoSessionToken(student, expiresAt);
+      upsertDemoSession(signedToken, userId, expiresAt);
+      return { token: signedToken, expiresAt };
+    }
     upsertDemoSession(token, userId, expiresAt);
     return { token, expiresAt };
   }

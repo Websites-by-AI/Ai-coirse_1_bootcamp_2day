@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
+import { createHmac, timingSafeEqual } from "crypto";
 import { hashPassword, passwordMatches } from "@/lib/password";
 
 export type DemoStudentRecord = {
@@ -93,6 +94,48 @@ type DemoStore = {
 };
 
 const STORE_PATH = join(process.cwd(), "data", "vibelab-demo-store.json");
+const DEMO_SESSION_PREFIX = "demo.";
+
+function base64UrlEncode(value: string) {
+  return Buffer.from(value, "utf8").toString("base64url");
+}
+
+function base64UrlDecode(value: string) {
+  return Buffer.from(value, "base64url").toString("utf8");
+}
+
+function demoSessionSecret() {
+  return process.env.AUTH_SECRET || process.env.AI_KEYS_ENCRYPTION_SECRET || "vibelab-demo-session-fallback-change-in-production";
+}
+
+function signPayload(payload: string) {
+  return createHmac("sha256", demoSessionSecret()).update(payload).digest("base64url");
+}
+
+function safeEqualText(a: string, b: string) {
+  const left = Buffer.from(a);
+  const right = Buffer.from(b);
+  return left.length === right.length && timingSafeEqual(left, right);
+}
+
+export function createSignedDemoSessionToken(student: Pick<DemoStudentRecord, "id" | "fullName" | "email" | "phone">, expiresAt: Date) {
+  const payload = base64UrlEncode(JSON.stringify({ id: student.id, fullName: student.fullName, email: student.email, phone: student.phone, exp: expiresAt.toISOString() }));
+  return `${DEMO_SESSION_PREFIX}${payload}.${signPayload(payload)}`;
+}
+
+function readSignedDemoSessionToken(token: string) {
+  if (!token.startsWith(DEMO_SESSION_PREFIX)) return null;
+  const [payload, signature] = token.slice(DEMO_SESSION_PREFIX.length).split(".");
+  if (!payload || !signature || !safeEqualText(signature, signPayload(payload))) return null;
+  try {
+    const parsed = JSON.parse(base64UrlDecode(payload)) as { id?: unknown; fullName?: unknown; email?: unknown; phone?: unknown; exp?: unknown };
+    if (typeof parsed.id !== "number" || typeof parsed.fullName !== "string" || typeof parsed.email !== "string" || typeof parsed.phone !== "string" || typeof parsed.exp !== "string") return null;
+    if (new Date(parsed.exp).getTime() <= Date.now()) return null;
+    return { id: parsed.id, fullName: parsed.fullName, email: parsed.email, phone: parsed.phone };
+  } catch {
+    return null;
+  }
+}
 
 type DemoGlobal = typeof globalThis & { __vibelabDemoStore?: DemoStore };
 const demoGlobal = globalThis as DemoGlobal;
@@ -184,6 +227,8 @@ export function upsertDemoSession(token: string, userId: number, expiresAt: Date
 
 export function getDemoStudentFromSession(token?: string) {
   if (!token) return null;
+  const signedStudent = readSignedDemoSessionToken(token);
+  if (signedStudent) return signedStudent;
   const store = loadStore();
   const session = store.sessions.find((item) => item.token === token && new Date(item.expiresAt).getTime() > Date.now());
   if (!session) return null;
