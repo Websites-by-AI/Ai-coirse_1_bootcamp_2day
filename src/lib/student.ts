@@ -22,6 +22,16 @@ import {
   upsertDemoSession,
   createSignedDemoSessionToken,
 } from "@/lib/demo-store";
+import {
+  d1AuthenticateStudent,
+  d1CreateAssessment,
+  d1CreateStudentSession,
+  d1DeleteStudentSession,
+  d1EnsureDemoStudent,
+  d1GetLatestAssessment,
+  d1GetStudentFromSession,
+  d1RegisterStudent,
+} from "@/lib/d1-student-store";
 
 export const STUDENT_COOKIE_NAME = "vibelab_student_session";
 export const DEMO_STUDENT = {
@@ -69,18 +79,21 @@ function demoAssessmentView(assessment: ReturnType<typeof getDemoStore>["assessm
 }
 
 async function ensureDemoStudentWithoutDatabase() {
+  const demoInput: AssessmentInput = {
+    goal: "ساخت وب‌سایت یا مینی‌اپ برای ایده‌ام",
+    experienceLevel: "با ابزارهای AI کمی کار کرده‌ام",
+    weeklyHours: 7,
+    projectIdea: "می‌خواهم برای یک کسب‌وکار خانگی، یک لندینگ ساده و یک ویدیوی کوتاه معرفی بسازم تا سفارش‌های محلی بیشتری دریافت کنم.",
+  };
+  const result = await assessStudentFit(demoInput);
+  const d1Student = await d1EnsureDemoStudent({ ...DEMO_STUDENT, assessment: demoInput, analysis: result });
+  if (d1Student) return d1Student;
+
   let student = findDemoStudentByEmail(DEMO_STUDENT.email);
   if (!student) student = createDemoStudent(DEMO_STUDENT);
   const store = getDemoStore();
   const existingAssessment = store.assessments.find((item) => item.userId === student.id);
   if (!existingAssessment) {
-    const demoInput: AssessmentInput = {
-      goal: "ساخت وب‌سایت یا مینی‌اپ برای ایده‌ام",
-      experienceLevel: "با ابزارهای AI کمی کار کرده‌ام",
-      weeklyHours: 7,
-      projectIdea: "می‌خواهم برای یک کسب‌وکار خانگی، یک لندینگ ساده و یک ویدیوی کوتاه معرفی بسازم تا سفارش‌های محلی بیشتری دریافت کنم.",
-    };
-    const result = await assessStudentFit(demoInput);
     store.assessments.push({
       id: store.nextAssessmentId++,
       userId: student.id,
@@ -168,6 +181,7 @@ export async function createStudentSession(userId: number) {
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 14);
   if (!hasDatabaseDriver()) {
+    if (await d1CreateStudentSession(userId, token, expiresAt)) return { token, expiresAt };
     const student = getDemoStore().students.find((item) => item.id === userId);
     if (student) {
       const signedToken = createSignedDemoSessionToken(student, expiresAt);
@@ -183,7 +197,11 @@ export async function createStudentSession(userId: number) {
 
 export async function getStudentFromSession(token?: string): Promise<StudentProfile | null> {
   if (!token) return null;
-  if (!hasDatabaseDriver()) return getDemoStudentFromSession(token);
+  if (!hasDatabaseDriver()) {
+    const d1Student = await d1GetStudentFromSession(token);
+    if (d1Student !== undefined) return d1Student;
+    return getDemoStudentFromSession(token);
+  }
   const [student] = await db
     .select({
       id: studentUsers.id,
@@ -238,6 +256,8 @@ export async function authenticateGoogleStudent(identity: GoogleStudentIdentity)
 export async function authenticateStudent(email: string, password: string): Promise<StudentProfile | null> {
   if (!hasDatabaseDriver()) {
     await ensureDemoStudentWithoutDatabase();
+    const d1Student = await d1AuthenticateStudent(email, password);
+    if (d1Student !== undefined) return d1Student;
     return authenticateDemoStudent(email, password);
   }
   await ensureDemoStudent();
@@ -256,6 +276,7 @@ export async function authenticateStudent(email: string, password: string): Prom
 export async function deleteStudentSession(token?: string) {
   if (!token) return;
   if (!hasDatabaseDriver()) {
+    if (await d1DeleteStudentSession(token)) return;
     deleteDemoSession(token);
     return;
   }
@@ -264,6 +285,8 @@ export async function deleteStudentSession(token?: string) {
 
 export async function getLatestStudentAssessment(userId: number): Promise<StudentAssessmentView | null> {
   if (!hasDatabaseDriver()) {
+    const d1Assessment = await d1GetLatestAssessment(userId);
+    if (d1Assessment !== undefined) return d1Assessment;
     const assessment = getDemoStore().assessments
       .filter((item) => item.userId === userId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
@@ -295,10 +318,12 @@ export async function createAssessmentForStudent(userId: number, input: Assessme
   if (!Number.isInteger(input.weeklyHours) || input.weeklyHours < 1 || input.weeklyHours > 80) throw new Error("زمان هفتگی را بین ۱ تا ۸۰ ساعت وارد کنید.");
 
   if (!hasDatabaseDriver()) {
+    const analysis = await assessStudentFit(input);
+    const d1Assessment = await d1CreateAssessment(userId, input, analysis);
+    if (d1Assessment !== undefined) return d1Assessment;
     const store = getDemoStore();
     const student = store.students.find((item) => item.id === userId);
     if (!student) throw new Error("حساب کاربری پیدا نشد.");
-    const analysis = await assessStudentFit(input);
     const assessment = {
       id: store.nextAssessmentId++,
       userId,
@@ -374,9 +399,12 @@ export async function registerStudent(input: {
   if (!Number.isInteger(input.assessment.weeklyHours) || input.assessment.weeklyHours < 1 || input.assessment.weeklyHours > 80) throw new Error("زمان هفتگی را بین ۱ تا ۸۰ ساعت وارد کنید.");
 
   if (!hasDatabaseDriver()) {
+    const analysis = await assessStudentFit(input.assessment);
+    const d1Result = await d1RegisterStudent({ fullName, email, phone, password: input.password, assessment: input.assessment, analysis });
+    if (d1Result !== undefined) return d1Result;
+
     if (findDemoStudentByEmail(email)) throw new Error("با این ایمیل قبلاً حساب کاربری ساخته شده است. از ورود استفاده کنید.");
     const studentRecord = createDemoStudent({ fullName, email, phone, password: input.password });
-    const analysis = await assessStudentFit(input.assessment);
     const store = getDemoStore();
     const assessmentRecord = {
       id: store.nextAssessmentId++,

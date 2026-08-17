@@ -8,6 +8,13 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "d1_databases": [
+    {
+      "binding": "VIBELAB_DB",
+      "database_name": "taranom-hamdeli-db",
+      "database_id": "fb4c6326-d73b-4fbf-bfdd-f9d8313ce6bf"
+    }
+  ],
   "observability": {
     "enabled": true
   }

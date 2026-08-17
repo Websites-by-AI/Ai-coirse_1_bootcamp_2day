@@ -28,8 +28,11 @@ function has(value?: string | null) {
  */
 export function getRuntimeStatus(options?: {
   databaseReachable?: boolean | null;
+  cloudflareD1Reachable?: boolean | null;
 }): RuntimeStatus {
-  const databaseConfigured = has(process.env.DATABASE_URL);
+  const postgresConfigured = has(process.env.DATABASE_URL);
+  const cloudflareD1Reachable = options?.cloudflareD1Reachable ?? null;
+  const databaseConfigured = postgresConfigured || cloudflareD1Reachable === true;
   const googleStudentConfigured =
     has(process.env.GOOGLE_CLIENT_ID) && has(process.env.GOOGLE_CLIENT_SECRET);
   const googleAdminConfigured =
@@ -59,7 +62,7 @@ export function getRuntimeStatus(options?: {
   }
 
   const critical = issues.some((i) => i.severity === "critical");
-  const demoMode = !databaseConfigured || databaseReachable === false;
+  const demoMode = !databaseConfigured || (postgresConfigured && databaseReachable === false && cloudflareD1Reachable !== true);
   const summary = critical
     ? "سایت بالا است ولی دیتابیس وصل نیست."
     : demoMode
