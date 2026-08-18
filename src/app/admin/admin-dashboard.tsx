@@ -28,6 +28,70 @@ const jobPlaybook = [
   { title: "شاخص آمادگی", detail: "امتیاز ارزیابی بالای ۷۵ + پروژه منتشرشده + رزومه تکمیل‌شده = آماده معرفی به کارفرما." },
 ];
 
+const opportunityCalls = [
+  {
+    title: "Osome UAE — Business Setup Contact",
+    region: "UAE / Dubai",
+    status: "آماده ارسال",
+    url: "https://osome.com/ae/contact-us/#contact-us-form",
+    fit: "ثبت شرکت، مجوز فعالیت، ویزا و بانک برای VibeLab",
+    template: `Hello Osome team,
+
+I am exploring UAE company setup options for VibeLab, an AI-powered learning and portfolio platform for creators, freelancers and small businesses. The platform is live at https://v2.vibelab.ir and currently runs on Cloudflare Workers with Cloudflare D1 database.
+
+VibeLab helps non-technical users build AI content kits, live websites/MVPs, resume-ready portfolios and job-finding workflows. We are preparing the product for a six-week AI program and potential UAE/MENA expansion.
+
+I would like guidance on the best UAE setup option for an AI education/software startup, including Free Zone vs Mainland, licensing activity, founder visa options, bank account setup, expected costs, and timeline.
+
+Contact: Soheil — soheil.power@gmail.com — +1-2085033653
+Website: https://v2.vibelab.ir
+
+Best,
+Soheil
+VibeLab`,
+  },
+  {
+    title: "Presight AI-Startup Accelerator",
+    region: "UAE / Abu Dhabi",
+    status: "نیازمند بررسی دوره بعدی",
+    url: "https://www.presight.ai/accelerator",
+    fit: "AI startup، محصول آماده، اتصال به اکوسیستم G42 و بازارهای منطقه",
+    template: `Startup: VibeLab
+Website: https://v2.vibelab.ir
+Founder contact: Soheil — soheil.power@gmail.com — +1-2085033653
+
+VibeLab is an AI-powered learning and portfolio platform for non-technical creators, freelancers and small businesses. It helps users turn ideas into content kits, AI-generated videos, live websites, resumes and job-ready portfolios through a structured six-week program.
+
+We are applying because the UAE is a strong launch market for practical AI adoption, SME digitization and workforce upskilling. VibeLab turns AI literacy into measurable outputs: content, websites, MVPs and job-ready portfolios.`,
+  },
+  {
+    title: "Dubai Future / DCAI AI Accelerator",
+    region: "UAE / Dubai",
+    status: "فراخوان دوره بعدی را رصد کن",
+    url: "https://www.dubaifuture.ae/",
+    fit: "AI برای دولت، رسانه، آموزش و خدمات شهری؛ مناسب نسخه انگلیسی/Pitch",
+    template: `VibeLab can support practical AI upskilling for creators, SMEs and non-technical teams by combining structured learning with production-ready outputs: AI content kits, websites, portfolios and job-finding workflows.
+
+We are interested in UAE/Dubai pilots for AI education, SME digitization and workforce readiness. Live product: https://v2.vibelab.ir`,
+  },
+  {
+    title: "Mastercard Lighthouse UAE / AI Office",
+    region: "UAE / Fintech + AI ecosystem",
+    status: "رصد و آماده‌سازی pitch",
+    url: "https://www.mastercard.com/news/eemea/en/newsroom/",
+    fit: "برای نسخه‌هایی که AI + SME finance / commerce / trust داشته باشند",
+    template: `VibeLab helps micro and small businesses adopt AI by creating market-ready content, live websites and portfolio assets. For a UAE pilot, VibeLab can be positioned as an AI enablement layer for SMEs, creators and early-stage founders preparing to digitize sales, content and customer acquisition.`,
+  },
+  {
+    title: "Turkey / MENA Market Check",
+    region: "Turkey / Istanbul + Remote",
+    status: "پیش‌نویس عمومی",
+    url: "https://www.invest.gov.tr/",
+    fit: "اگر منظور ترکیه باشد: بررسی ثبت شرکت، بازار آموزش AI، فروش B2B و همکاری محلی",
+    template: `Hello,\n\nI am exploring Turkey/MENA expansion options for VibeLab, an AI-powered learning and portfolio platform. VibeLab helps creators, freelancers and small businesses build AI content kits, live websites, resumes and job-ready portfolios.\n\nWebsite: https://v2.vibelab.ir\nContact: Soheil — soheil.power@gmail.com — +1-2085033653\n\nI would like to understand company setup options, suitable business activity, banking, tax, and partnership opportunities for an AI education/software startup.`,
+  },
+];
+
 function AdminIcon({ name, size = 18 }: { name: "arrow" | "calendar" | "check" | "database" | "exit" | "grid" | "mail" | "more" | "refresh" | "search" | "settings" | "spark" | "users"; size?: number }) {
   const paths = {
     arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
@@ -105,11 +169,22 @@ export default function AdminDashboard({ admin, initialData, initialAiData, init
     router.refresh();
   };
 
+  const copyOpportunityTemplate = async (title: string, template: string) => {
+    try {
+      await navigator.clipboard.writeText(template);
+      setMessage(`متن فرم «${title}» کپی شد.`);
+    } catch {
+      setMessage("کپی خودکار ممکن نشد؛ متن را دستی انتخاب و کپی کنید.");
+    } finally {
+      window.setTimeout(() => setMessage(""), 3000);
+    }
+  };
+
   return (
     <main dir="rtl" className="admin-app">
       <aside className="admin-sidebar">
         <a href="/" className="admin-brand"><span>V</span><b>VibeLab</b><small>ADMIN</small></a>
-        <nav className="admin-side-nav"><a className="active" href="#overview"><AdminIcon name="grid" /> نمای کلی</a><a href="#registrations"><AdminIcon name="users" /> ثبت‌نام‌ها <em>{stats.total}</em></a><a href="#workshop"><AdminIcon name="calendar" /> ماراتن دو روزه</a><a href="#ai-apis"><AdminIcon name="settings" /> AI API و هشدارها</a><a href="#assessment-sandbox"><AdminIcon name="settings" /> تست AI Scanner</a><a href="#security-tests"><AdminIcon name="settings" /> تست‌های امنیتی</a><a href="#release-center"><AdminIcon name="settings" /> نسخه‌ها و راه‌اندازی</a><a href="#users-model"><AdminIcon name="database" /> مدل کاربران</a><a href="#student-analysis"><AdminIcon name="spark" /> تحلیل کاربران</a><a href="/"><AdminIcon name="spark" /> صفحه‌ی سایت</a></nav>
+        <nav className="admin-side-nav"><a className="active" href="#overview"><AdminIcon name="grid" /> نمای کلی</a><a href="#registrations"><AdminIcon name="users" /> ثبت‌نام‌ها <em>{stats.total}</em></a><a href="#workshop"><AdminIcon name="calendar" /> ماراتن دو روزه</a><a href="#ai-apis"><AdminIcon name="settings" /> AI API و هشدارها</a><a href="#assessment-sandbox"><AdminIcon name="settings" /> تست AI Scanner</a><a href="#security-tests"><AdminIcon name="settings" /> تست‌های امنیتی</a><a href="#release-center"><AdminIcon name="settings" /> نسخه‌ها و راه‌اندازی</a><a href="#users-model"><AdminIcon name="database" /> مدل کاربران</a><a href="#opportunity-center"><AdminIcon name="mail" /> فراخوان‌ها و فرم‌ها</a><a href="#student-analysis"><AdminIcon name="spark" /> تحلیل کاربران</a><a href="/"><AdminIcon name="spark" /> صفحه‌ی سایت</a></nav>
         <div className="admin-side-bottom"><div className="admin-db-chip"><span><AdminIcon name="database" size={16} /></span><div><b>PostgreSQL</b><small><i /> اتصال برقرار است</small></div></div><button onClick={logout}><AdminIcon name="exit" /> خروج از پنل</button></div>
       </aside>
       <section className="admin-main">
@@ -123,6 +198,7 @@ export default function AdminDashboard({ admin, initialData, initialAiData, init
             <article className="admin-insight-card"><p>YOUTUBE</p><h2>مسیرهای ویدیویی مکمل</h2>{youtubeLearningResources.map((item) => <a key={item.title} href={item.url} target="_blank" rel="noreferrer"><b>{item.title}</b><small>{item.channel}</small></a>)}</article>
             <article className="admin-insight-card"><p>JOB MODEL</p><h2>مدل پیدا کردن کار برای هنرجو</h2>{jobPlaybook.map((item) => <div key={item.title} className="job-playbook-item"><b>{item.title}</b><small>{item.detail}</small></div>)}</article>
           </section>
+          <section className="opportunity-center" id="opportunity-center"><div className="opportunity-head"><div><p>UAE / ACCELERATOR FORMS</p><h2>فراخوان‌ها و فرم‌های آماده کپی</h2><span>برای ثبت شرکت، برنامه‌های شتاب‌دهنده و مکاتبه با سازمان‌ها؛ متن‌ها آماده‌اند و قبل از ارسال باید بازبینی شوند.</span></div><a href="https://github.com/Websites-by-AI/Ai-coirse_1_bootcamp_2day/blob/main/docs/UAE_FORM_PACK.md" target="_blank" rel="noreferrer">پک فرم‌ها</a></div><div className="opportunity-grid">{opportunityCalls.map((item) => <article className="opportunity-card" key={item.title}><div className="opportunity-card-top"><span>{item.region}</span><em>{item.status}</em></div><h3>{item.title}</h3><p>{item.fit}</p><textarea readOnly value={item.template} aria-label={`متن فرم ${item.title}`} /><div className="opportunity-actions"><a href={item.url} target="_blank" rel="noreferrer">باز کردن فرم <AdminIcon name="arrow" size={14} /></a><button type="button" onClick={() => copyOpportunityTemplate(item.title, item.template)}>کپی متن فرم</button></div></article>)}</div></section>
           <SecurityCenter initialReport={initialSecurityReport} />
           <SetupReleaseCenter releases={releases} githubUrl={githubUrl} connectedProviders={initialAiData.providers.filter((provider) => provider.lastStatus === "connected").length} />
           <AiProviderManager initialData={initialAiData} />
