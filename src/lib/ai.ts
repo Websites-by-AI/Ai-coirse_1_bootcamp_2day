@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
 import { desc, eq } from "drizzle-orm";
-import { db } from "@/db";
+import { db, hasDatabaseDriver } from "@/db";
 import { aiProviderConfigs, aiUsageEvents } from "@/db/schema";
 
 export const AI_PROVIDER_OPTIONS = [
@@ -67,6 +67,7 @@ function safeError(message: string) {
 }
 
 export async function ensureEnvironmentProviders() {
+  if (!hasDatabaseDriver()) return;
   for (const option of AI_PROVIDER_OPTIONS) {
     const apiKey = process.env[option.environmentVariable];
     if (!apiKey) continue;
@@ -110,6 +111,9 @@ function serializeProvider(row: typeof aiProviderConfigs.$inferSelect): AiProvid
 }
 
 export async function getAiDashboardData() {
+  if (!hasDatabaseDriver()) {
+    return { providers: [], alerts: [{ severity: "info" as const, text: "در حالت Cloudflare D1، اتصال AI هنوز در دیتابیس Postgres/Vault ذخیره نشده است؛ تحلیل‌ها با fallback آموزشی اجرا می‌شوند." }] };
+  }
   await ensureEnvironmentProviders();
   const rows = await db.select().from(aiProviderConfigs).orderBy(desc(aiProviderConfigs.createdAt));
   const providers = rows.map(serializeProvider);

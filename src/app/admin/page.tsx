@@ -8,17 +8,12 @@ import {
   getDashboardData,
   isGoogleAuthConfigured,
 } from "@/lib/admin";
-import { isDatabaseConfigured } from "@/db";
 import AdminDashboard from "./admin-dashboard";
 import AdminLogin from "./admin-login";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  if (!isDatabaseConfigured) {
-    return <AdminLogin googleEnabled={false} />;
-  }
-
   try {
     const cookieStore = await cookies();
     const admin = await getAdminFromSession(cookieStore.get(ADMIN_COOKIE_NAME)?.value);

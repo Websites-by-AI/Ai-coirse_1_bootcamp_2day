@@ -1,20 +1,8 @@
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE_NAME, authenticateAdmin, createAdminSession } from "@/lib/admin";
 import { authCookieOptions } from "@/lib/auth-settings";
-import { isDatabaseConfigured } from "@/db";
 
 export async function POST(request: Request) {
-  if (!isDatabaseConfigured) {
-    return NextResponse.json(
-      {
-        error:
-          "دیتابیس تنظیم نشده است. پنل ادمین در حالت نمایشی است. DATABASE_URL را روی Vercel ست کنید.",
-        demoMode: true,
-      },
-      { status: 503 },
-    );
-  }
-
   try {
     const body = (await request.json()) as { username?: unknown; password?: unknown };
     const username = typeof body.username === "string" ? body.username : "";

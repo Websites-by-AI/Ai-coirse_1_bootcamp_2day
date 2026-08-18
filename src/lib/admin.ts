@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { and, desc, eq, gt, sql } from "drizzle-orm";
-import { db } from "@/db";
+import { db, hasDatabaseDriver } from "@/db";
 import { hashPassword, isModernPasswordHash, passwordMatches } from "@/lib/password";
 import { ensureDemoStudent } from "@/lib/student";
 import { adminSessions, adminUsers, enrollments, studentAssessments, studentUsers } from "@/db/schema";
@@ -9,6 +9,15 @@ import {
   isGoogleAdminAuthConfigured,
   isGoogleOAuthConfigured as isGoogleOAuthConfiguredBase,
 } from "@/lib/auth-settings";
+import {
+  d1AuthenticateAdmin,
+  d1CreateAdminSession,
+  d1DeleteAdminSession,
+  d1EnsureAdmin,
+  d1GetAdminFromSession,
+  d1GetDashboardData,
+  d1UpdateEnrollmentStatus,
+} from "@/lib/d1-admin-store";
 
 export const ADMIN_COOKIE_NAME = "vibelab_admin_session";
 export const DEMO_ADMIN = {
@@ -42,6 +51,16 @@ export type DashboardAssessment = {
   createdAt: string;
 };
 
+export type DashboardStudentUser = {
+  id: number;
+  fullName: string;
+  email: string;
+  phone: string;
+  authProvider: string;
+  status: string;
+  createdAt: string;
+};
+
 export type GoogleIdentity = {
   subject: string;
   email: string;
@@ -61,6 +80,10 @@ function googleAdminEmails() {
 }
 
 export async function ensureDemoData() {
+  if (!hasDatabaseDriver()) {
+    await d1EnsureAdmin();
+    return;
+  }
   await db
     .insert(adminUsers)
     .values({
@@ -110,6 +133,7 @@ export async function ensureDemoData() {
 }
 
 export async function authenticateAdmin(username: string, password: string) {
+  if (!hasDatabaseDriver()) return d1AuthenticateAdmin(username, password);
   await ensureDemoData();
   const normalizedUsername = username.trim().toLowerCase();
   const [user] = await db
@@ -170,6 +194,10 @@ export async function authenticateGoogleAdmin(identity: GoogleIdentity) {
 }
 
 export async function createAdminSession(userId: number) {
+  if (!hasDatabaseDriver()) {
+    const d1Session = await d1CreateAdminSession(userId);
+    if (d1Session) return d1Session;
+  }
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24);
   await db.insert(adminSessions).values({ token, userId, expiresAt });
@@ -178,6 +206,10 @@ export async function createAdminSession(userId: number) {
 
 export async function getAdminFromSession(token?: string) {
   if (!token) return null;
+  if (!hasDatabaseDriver()) {
+    const d1Admin = await d1GetAdminFromSession(token);
+    if (d1Admin !== undefined) return d1Admin;
+  }
   const [session] = await db
     .select({
       id: adminUsers.id,
@@ -193,10 +225,15 @@ export async function getAdminFromSession(token?: string) {
 
 export async function deleteAdminSession(token?: string) {
   if (!token) return;
+  if (!hasDatabaseDriver() && await d1DeleteAdminSession(token)) return;
   await db.delete(adminSessions).where(eq(adminSessions.token, token));
 }
 
 export async function getDashboardData() {
+  if (!hasDatabaseDriver()) {
+    const d1Dashboard = await d1GetDashboardData();
+    if (d1Dashboard) return d1Dashboard;
+  }
   await ensureDemoData();
   await ensureDemoStudent();
   await db.execute(sql`select 1`);
@@ -264,6 +301,10 @@ export async function getDashboardData() {
 export async function updateEnrollmentStatus(id: number, status: string) {
   const allowedStatuses = ["جدید", "در انتظار", "تأیید شده", "لغو شده"];
   if (!allowedStatuses.includes(status)) throw new Error("Invalid enrollment status");
+  if (!hasDatabaseDriver()) {
+    const d1Updated = await d1UpdateEnrollmentStatus(id, status);
+    if (d1Updated !== undefined) return d1Updated;
+  }
 
   const [updated] = await db
     .update(enrollments)

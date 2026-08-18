@@ -5,16 +5,28 @@ import { useRouter } from "next/navigation";
 import type { AiAlert, AiProviderDashboardItem } from "@/lib/ai";
 import type { SecurityReport } from "@/lib/security";
 import type { ReleaseNote } from "@/lib/releases";
-import type { DashboardAssessment, DashboardEnrollment } from "@/lib/admin";
+import type { DashboardAssessment, DashboardEnrollment, DashboardStudentUser } from "@/lib/admin";
 import AiProviderManager from "./ai-provider-manager";
 import AssessmentSandbox from "./assessment-sandbox";
 import SecurityCenter from "./security-center";
 import SetupReleaseCenter from "./setup-release-center";
 import StudentAssessmentList from "./student-assessment-list";
 
-type DashboardData = { registrations: DashboardEnrollment[]; assessments: DashboardAssessment[]; stats: { total: number; pending: number; confirmed: number; newLeads: number; students: number; readyStudents: number } };
+type DashboardData = { registrations: DashboardEnrollment[]; assessments: DashboardAssessment[]; users?: DashboardStudentUser[]; stats: { total: number; pending: number; confirmed: number; newLeads: number; students: number; readyStudents: number } };
 type AiDashboardData = { providers: AiProviderDashboardItem[]; alerts: AiAlert[] };
 type StatusFilter = "همه" | "جدید" | "در انتظار" | "تأیید شده" | "لغو شده";
+
+const youtubeLearningResources = [
+  { title: "ساخت رزومه و پروفایل فریلنسری با AI", channel: "YouTube Search", url: "https://www.youtube.com/results?search_query=AI+resume+portfolio+freelancing" },
+  { title: "پیدا کردن پروژه فریلنس با LinkedIn و Upwork", channel: "YouTube Search", url: "https://www.youtube.com/results?search_query=find+freelance+clients+linkedin+upwork+ai" },
+  { title: "Vibe Coding و ساخت MVP بدون کدنویسی", channel: "YouTube Search", url: "https://www.youtube.com/results?search_query=vibe+coding+build+MVP+AI" },
+];
+
+const jobPlaybook = [
+  { title: "مدل پیدا کردن کار", detail: "هر کاربر باید یک پروفایل عمومی، ۳ نمونه‌کار، یک رزومه کوتاه و پیام معرفی ۵ خطی داشته باشد." },
+  { title: "کانال‌های جذب پروژه", detail: "LinkedIn، Upwork، پونیشا، کارلنسر، گروه‌های تلگرام تخصصی و ارسال مستقیم به کسب‌وکارهای محلی." },
+  { title: "شاخص آمادگی", detail: "امتیاز ارزیابی بالای ۷۵ + پروژه منتشرشده + رزومه تکمیل‌شده = آماده معرفی به کارفرما." },
+];
 
 function AdminIcon({ name, size = 18 }: { name: "arrow" | "calendar" | "check" | "database" | "exit" | "grid" | "mail" | "more" | "refresh" | "search" | "settings" | "spark" | "users"; size?: number }) {
   const paths = {
@@ -53,8 +65,10 @@ export default function AdminDashboard({ admin, initialData, initialAiData, init
   const [query, setQuery] = useState("");
   const [savingId, setSavingId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
+  const users = initialData.users ?? [];
+  const readyEmails = new Set(initialData.assessments.filter((item) => item.fitLevel === "آماده برای ماراتن" || item.score >= 75).map((item) => item.email));
 
-  const stats = useMemo(() => ({
+  const stats = useMemo(() => ({ 
     total: registrations.length,
     pending: registrations.filter((item) => item.status === "در انتظار").length,
     confirmed: registrations.filter((item) => item.status === "تأیید شده").length,
@@ -95,7 +109,7 @@ export default function AdminDashboard({ admin, initialData, initialAiData, init
     <main dir="rtl" className="admin-app">
       <aside className="admin-sidebar">
         <a href="/" className="admin-brand"><span>V</span><b>VibeLab</b><small>ADMIN</small></a>
-        <nav className="admin-side-nav"><a className="active" href="#overview"><AdminIcon name="grid" /> نمای کلی</a><a href="#registrations"><AdminIcon name="users" /> ثبت‌نام‌ها <em>{stats.total}</em></a><a href="#workshop"><AdminIcon name="calendar" /> ماراتن دو روزه</a><a href="#ai-apis"><AdminIcon name="settings" /> AI API و هشدارها</a><a href="#assessment-sandbox"><AdminIcon name="settings" /> تست AI Scanner</a><a href="#security-tests"><AdminIcon name="settings" /> تست‌های امنیتی</a><a href="#release-center"><AdminIcon name="settings" /> نسخه‌ها و راه‌اندازی</a><a href="#student-analysis"><AdminIcon name="spark" /> تحلیل کاربران</a><a href="/"><AdminIcon name="spark" /> صفحه‌ی سایت</a></nav>
+        <nav className="admin-side-nav"><a className="active" href="#overview"><AdminIcon name="grid" /> نمای کلی</a><a href="#registrations"><AdminIcon name="users" /> ثبت‌نام‌ها <em>{stats.total}</em></a><a href="#workshop"><AdminIcon name="calendar" /> ماراتن دو روزه</a><a href="#ai-apis"><AdminIcon name="settings" /> AI API و هشدارها</a><a href="#assessment-sandbox"><AdminIcon name="settings" /> تست AI Scanner</a><a href="#security-tests"><AdminIcon name="settings" /> تست‌های امنیتی</a><a href="#release-center"><AdminIcon name="settings" /> نسخه‌ها و راه‌اندازی</a><a href="#users-model"><AdminIcon name="database" /> مدل کاربران</a><a href="#student-analysis"><AdminIcon name="spark" /> تحلیل کاربران</a><a href="/"><AdminIcon name="spark" /> صفحه‌ی سایت</a></nav>
         <div className="admin-side-bottom"><div className="admin-db-chip"><span><AdminIcon name="database" size={16} /></span><div><b>PostgreSQL</b><small><i /> اتصال برقرار است</small></div></div><button onClick={logout}><AdminIcon name="exit" /> خروج از پنل</button></div>
       </aside>
       <section className="admin-main">
@@ -104,6 +118,11 @@ export default function AdminDashboard({ admin, initialData, initialAiData, init
           <div className="admin-context"><span><i /> دوره‌ی فعال</span><b>VibeLab / ماراتن ساخت با AI</b><small>آخرین بروزرسانی: هم‌اکنون</small></div>
           <section className="admin-stats"><article><div className="admin-stat-icon blue"><AdminIcon name="users" /></div><p>کل ثبت‌نام‌ها</p><b>{stats.total.toLocaleString("fa-IR")}</b><span>همه‌ی ورودی‌های ثبت‌شده</span></article><article><div className="admin-stat-icon purple"><AdminIcon name="spark" /></div><p>سرنخ‌های جدید</p><b>{stats.newLeads.toLocaleString("fa-IR")}</b><span>نیازمند پیگیری تیم</span></article><article><div className="admin-stat-icon orange"><AdminIcon name="calendar" /></div><p>در انتظار تأیید</p><b>{stats.pending.toLocaleString("fa-IR")}</b><span>منتظر هماهنگی نهایی</span></article><article><div className="admin-stat-icon green"><AdminIcon name="check" /></div><p>ثبت‌نام تأییدشده</p><b>{stats.confirmed.toLocaleString("fa-IR")}</b><span>صندلی رزرو شده</span></article></section>
           <section className="admin-workshop-card" id="workshop"><div className="admin-workshop-copy"><span><AdminIcon name="spark" size={15} /> برنامه‌ی فعال</span><h2>ماراتن دو روزه‌ی Vibe Coding</h2><p>از تولید محتوا با Gemini، Claude، Higgsfield و Kling تا ساخت وب‌اپ با Emergent؛ بدون نیاز به کدنویسی.</p><div><b>روز اول: Content Engine</b><i /><b>روز دوم: Vibe Product</b></div></div><div className="admin-workshop-meter"><span>ظرفیت اولیه</span><b>{stats.confirmed.toLocaleString("fa-IR")} <small>از ۳۰ نفر</small></b><i><em style={{ width: `${Math.min(100, (stats.confirmed / 30) * 100)}%` }} /></i><small>برای بازخورد شخصی، ظرفیت محدود است.</small></div></section>
+          <section className="admin-insight-grid" id="users-model">
+            <article className="admin-insight-card wide"><div><p>DATABASE MODEL</p><h2>کاربران ذخیره‌شده در Cloudflare D1</h2><span>{users.length.toLocaleString("fa-IR")} کاربر واقعی / دمو</span></div><div className="admin-mini-table">{users.slice(0, 6).map((user) => <div key={user.id}><b>{user.fullName}</b><small>{user.email}</small><em className={readyEmails.has(user.email) ? "ready" : ""}>{readyEmails.has(user.email) ? "آماده معرفی" : user.status}</em></div>)}{users.length === 0 && <p>هنوز کاربری ثبت نشده است.</p>}</div></article>
+            <article className="admin-insight-card"><p>YOUTUBE</p><h2>مسیرهای ویدیویی مکمل</h2>{youtubeLearningResources.map((item) => <a key={item.title} href={item.url} target="_blank" rel="noreferrer"><b>{item.title}</b><small>{item.channel}</small></a>)}</article>
+            <article className="admin-insight-card"><p>JOB MODEL</p><h2>مدل پیدا کردن کار برای هنرجو</h2>{jobPlaybook.map((item) => <div key={item.title} className="job-playbook-item"><b>{item.title}</b><small>{item.detail}</small></div>)}</article>
+          </section>
           <SecurityCenter initialReport={initialSecurityReport} />
           <SetupReleaseCenter releases={releases} githubUrl={githubUrl} connectedProviders={initialAiData.providers.filter((provider) => provider.lastStatus === "connected").length} />
           <AiProviderManager initialData={initialAiData} />
