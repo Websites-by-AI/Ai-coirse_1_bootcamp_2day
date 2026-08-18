@@ -86,6 +86,13 @@ const outcomes = [
   { title: 'رزومه و تحلیل AI', description: 'رزومه حرفه‌ای با تحلیل هوشمندانه AI، امتیازدهی و بازخورد برای بهبود پروفایل.', icon: 'check' as IconName, accent: 'green' },
 ];
 
+const marketPaths = [
+  { title: 'سازنده وب‌سایت برای کسب‌وکارهای ایران', market: 'بازار ایران', income: 'پروژه‌ای / محلی', description: 'لندینگ، سایت معرفی، صفحه فروش و فرم ثبت سفارش برای کلینیک، آموزشگاه، فروشگاه و خدمات محلی.', icon: 'globe' as IconName },
+  { title: 'تولیدکننده محتوا با AI', market: 'ایران و شبکه‌های اجتماعی', income: 'ماهانه / پکیج محتوا', description: 'سناریو، کپشن، استوری‌بورد، ویدیو کوتاه و تقویم محتوایی برای برندها و پیج‌ها.', icon: 'clapper' as IconName },
+  { title: 'فریلنسر MVP و No-Code', market: 'بازار بین‌المللی', income: 'Upwork / LinkedIn', description: 'ساخت نمونه اولیه، داشبورد ساده، اتوماسیون و ابزار داخلی برای مشتریان خارجی با زبان طبیعی و AI.', icon: 'code' as IconName },
+  { title: 'رزومه و نمونه‌کار قابل ارائه', market: 'استخدام / پروژه', income: 'مسیر ورود به کار', description: 'پروفایل عمومی، رزومه PDF، پیام معرفی و نمونه‌کار زنده برای ارسال به کارفرما یا مشتری.', icon: 'check' as IconName },
+];
+
 export default function HomeClient() {
   const [theme, setTheme] = useState<Theme>('dark');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -134,6 +141,7 @@ export default function HomeClient() {
     { href: '#tools', label: 'جعبه‌ابزار AI' },
     { href: '#syllabus', label: 'طرح درس دو روزه' },
     { href: '#outcomes', label: 'خروجی‌های شما' },
+    { href: '#market', label: 'مسیر کار' },
     { href: '/education', label: 'مرکز آموزش' },
     { href: '/login', label: 'ورود' },
     { href: '/register', label: 'ثبت‌نام' },
@@ -216,6 +224,8 @@ export default function HomeClient() {
       <section id="outcomes" className="outcomes-section">
         <div className="vibe-container"><div className="section-intro centered"><div className="vibe-eyebrow coral"><Icon name="target" size={15} /> فقط آموزش نیست</div><h2>در پایان چه چیزی <span>دستت است؟</span></h2></div><div className="outcome-grid">{outcomes.map((outcome, index) => <article className={`outcome-card ${outcome.accent}`} key={outcome.title}><span className="outcome-number">۰{index + 1}</span><span className="outcome-icon"><Icon name={outcome.icon} size={24} /></span><h3>{outcome.title}</h3><p>{outcome.description}</p><span className="outcome-line" /></article>)}</div><div className="share-strip"><div className="share-strip-icon"><Icon name="share" size={21} /></div><div><b>لینک این صفحه را برای شریک یا هم‌تیمی‌ات بفرست.</b><p>روی «کپی لینک» بزن؛ لینک همین صفحه در کلیپ‌بوردت قرار می‌گیرد.</p></div><button onClick={sharePage}><Icon name={shareStatus === 'idle' ? 'copy' : 'check'} size={17} /> {shareStatus === 'temporary' ? 'لینک preview موقت است' : shareStatus === 'copied' ? 'لینک کپی شد' : shareStatus === 'shared' ? 'ارسال شد' : 'کپی لینک صفحه'}</button></div></div>
       </section>
+
+      <section id="market" className="market-section"><div className="vibe-container"><div className="section-intro centered"><div className="vibe-eyebrow"><Icon name="target" size={15} /> مسیر بازار و کار</div><h2>این مهارت‌ها برای چه کاری <span>در ایران و بازار جهانی</span> کاربرد دارد؟</h2><p>VibeLab فقط آموزش ابزار نیست؛ خروجی پنل کاربر باید به رزومه، نمونه‌کار و مسیر پیدا کردن پروژه وصل شود.</p></div><div className="market-grid">{marketPaths.map((item) => <article key={item.title} className="market-card"><span><Icon name={item.icon} size={22} /></span><small>{item.market}</small><h3>{item.title}</h3><p>{item.description}</p><em>{item.income}</em></article>)}</div><div className="market-cta"><div><b>در پنل کاربر، برای همین مسیرها رزومه، پروژه، پیام معرفی و readiness score ساخته می‌شود.</b><p>اگر کاربر مشتاق تولید وب‌سایت یا تولید محتوا باشد، مسیر شغلی پیشنهادی و تمرین‌های YouTube/Job Finder را می‌بیند.</p></div><a href="/panel" className="vibe-primary"><Icon name="rocket" size={16} /> مشاهده پنل کاربر</a></div></div></section>
 
       <section id="resume" className="resume-section">
         <div className="vibe-container">
