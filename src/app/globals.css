@@ -1,28 +1,53 @@
 @import "tailwindcss";
 
-:root { --ui: Arial, Tahoma, sans-serif; }
+/* VibeLab Design System: typography + semantic colors */
+:root {
+  --font-fa: "Vazirmatn", "IRANSansX", "Dana", "Yekan Bakh", "Segoe UI", Tahoma, Arial, sans-serif;
+  --font-latin: "Inter", "Segoe UI", Arial, sans-serif;
+  --font-display: "Vazirmatn", "Dana", "Yekan Bakh", "Segoe UI", Tahoma, sans-serif;
+  --ui: var(--font-fa);
+
+  --ds-bg: #f8f8fc;
+  --ds-surface: #ffffff;
+  --ds-surface-soft: #f2f3fa;
+  --ds-ink: #18213e;
+  --ds-muted: #75819b;
+  --ds-line: #e3e6f0;
+  --ds-primary: #5368ea;
+  --ds-primary-strong: #374bd1;
+  --ds-secondary: #8c64e9;
+  --ds-accent: #ec7a64;
+  --ds-success: #38b58a;
+  --ds-warning: #e3a14a;
+  --ds-danger: #dd7770;
+  --ds-radius-sm: 10px;
+  --ds-radius-md: 16px;
+  --ds-radius-lg: 24px;
+  --ds-shadow: 0 20px 60px rgba(33,40,83,.08);
+}
+
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; font-family: var(--ui); }
+body { margin: 0; font-family: var(--ui); text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
 button, input { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
 .vibe-site {
-  --page: #f8f8fc;
-  --surface: #ffffff;
-  --surface-alt: #f2f3fa;
+  --page: var(--ds-bg);
+  --surface: var(--ds-surface);
+  --surface-alt: var(--ds-surface-soft);
   --header: rgba(248,248,252,.84);
-  --ink: #18213e;
-  --muted: #75819b;
+  --ink: var(--ds-ink);
+  --muted: var(--ds-muted);
   --muted-2: #9aa4b9;
-  --line: #e3e6f0;
-  --blue: #5368ea;
-  --blue-dark: #374bd1;
-  --purple: #8c64e9;
-  --coral: #ec7a64;
-  --green: #38b58a;
-  --shadow: 0 20px 60px rgba(33,40,83,.08);
+  --line: var(--ds-line);
+  --blue: var(--ds-primary);
+  --blue-dark: var(--ds-primary-strong);
+  --purple: var(--ds-secondary);
+  --coral: var(--ds-accent);
+  --green: var(--ds-success);
+  --shadow: var(--ds-shadow);
   min-height: 100vh;
   color: var(--ink);
   background: var(--page);
