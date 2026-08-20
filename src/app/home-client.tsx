@@ -93,6 +93,13 @@ const marketPaths = [
   { title: 'رزومه و نمونه‌کار قابل ارائه', market: 'استخدام / پروژه', income: 'مسیر ورود به کار', description: 'پروفایل عمومی، رزومه PDF، پیام معرفی و نمونه‌کار زنده برای ارسال به کارفرما یا مشتری.', icon: 'check' as IconName },
 ];
 
+const startupCallsTeaser = [
+  { name: 'UAE Business Setup', note: 'Osome / ثبت شرکت و مجوز فعالیت', status: 'آماده تماس' },
+  { name: 'UAE AI Accelerators', note: 'Presight، Dubai Future، Mastercard Lighthouse', status: 'رصد فراخوان' },
+  { name: 'Global Startup Programs', note: 'NVIDIA، Microsoft، Google، Techstars', status: 'مناسب اقدام' },
+  { name: 'Canada Track', note: 'CDL و DMZ؛ با توجه به محدودیت ویزا بررسی دقیق لازم دارد', status: 'مشروط' },
+];
+
 export default function HomeClient() {
   const [theme, setTheme] = useState<Theme>('dark');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -142,6 +149,7 @@ export default function HomeClient() {
     { href: '#syllabus', label: 'طرح درس دو روزه' },
     { href: '#outcomes', label: 'خروجی‌های شما' },
     { href: '#market', label: 'مسیر کار' },
+    { href: '#startup-calls', label: 'استارتاپ' },
     { href: '/education', label: 'مرکز آموزش' },
     { href: '/login', label: 'ورود' },
     { href: '/register', label: 'ثبت‌نام' },
@@ -226,6 +234,8 @@ export default function HomeClient() {
       </section>
 
       <section id="market" className="market-section"><div className="vibe-container"><div className="section-intro centered"><div className="vibe-eyebrow"><Icon name="target" size={15} /> مسیر بازار و کار</div><h2>این مهارت‌ها برای چه کاری <span>در ایران و بازار جهانی</span> کاربرد دارد؟</h2><p>VibeLab فقط آموزش ابزار نیست؛ خروجی پنل کاربر باید به رزومه، نمونه‌کار و مسیر پیدا کردن پروژه وصل شود.</p></div><div className="market-grid">{marketPaths.map((item) => <article key={item.title} className="market-card"><span><Icon name={item.icon} size={22} /></span><small>{item.market}</small><h3>{item.title}</h3><p>{item.description}</p><em>{item.income}</em></article>)}</div><div className="market-cta"><div><b>در پنل کاربر، برای همین مسیرها رزومه، پروژه، پیام معرفی و readiness score ساخته می‌شود.</b><p>اگر کاربر مشتاق تولید وب‌سایت یا تولید محتوا باشد، مسیر شغلی پیشنهادی و تمرین‌های YouTube/Job Finder را می‌بیند.</p></div><a href="/panel" className="vibe-primary"><Icon name="rocket" size={16} /> مشاهده پنل کاربر</a></div></div></section>
+
+      <section id="startup-calls" className="startup-calls-section"><div className="vibe-container"><div className="startup-calls-layout"><div><div className="vibe-eyebrow coral"><Icon name="rocket" size={15} /> مسیر استارتاپ و فراخوان‌ها</div><h2>VibeLab برای اپلای، ثبت شرکت و همکاری بین‌المللی آماده می‌شود.</h2><p>در پنل ادمین، ۱۰ فراخوان و مسیر مرتبط با امارات، کانادا و برنامه‌های جهانی ثبت شده؛ متن فرم‌ها آماده کپی است و زمان پیگیری هر مورد مشخص شده است.</p><a href="/admin" className="vibe-primary"><Icon name="arrow" size={16} /> ورود ادمین و دیدن فراخوان‌ها</a></div><div className="startup-calls-list">{startupCallsTeaser.map((item) => <article key={item.name}><span>{item.status}</span><b>{item.name}</b><p>{item.note}</p></article>)}</div></div></div></section>
 
       <section id="resume" className="resume-section">
         <div className="vibe-container">

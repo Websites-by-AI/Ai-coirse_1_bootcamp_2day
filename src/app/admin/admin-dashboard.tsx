@@ -30,65 +30,124 @@ const jobPlaybook = [
 
 const opportunityCalls = [
   {
-    title: "Osome UAE — Business Setup Contact",
+    title: "Osome UAE — Business Setup",
     region: "UAE / Dubai",
     status: "آماده ارسال",
+    deadline: "Rolling",
+    responseTime: "۱ تا ۳ روز کاری",
+    followUp: "۳ روز بعد از ارسال",
+    contact: "Contact form",
     url: "https://osome.com/ae/contact-us/#contact-us-form",
-    fit: "ثبت شرکت، مجوز فعالیت، ویزا و بانک برای VibeLab",
-    template: `Hello Osome team,
-
-I am exploring UAE company setup options for VibeLab, an AI-powered learning and portfolio platform for creators, freelancers and small businesses. The platform is live at https://v2.vibelab.ir and currently runs on Cloudflare Workers with Cloudflare D1 database.
-
-VibeLab helps non-technical users build AI content kits, live websites/MVPs, resume-ready portfolios and job-finding workflows. We are preparing the product for a six-week AI program and potential UAE/MENA expansion.
-
-I would like guidance on the best UAE setup option for an AI education/software startup, including Free Zone vs Mainland, licensing activity, founder visa options, bank account setup, expected costs, and timeline.
-
-Contact: Soheil — soheil.power@gmail.com — +1-2085033653
-Website: https://v2.vibelab.ir
-
-Best,
-Soheil
-VibeLab`,
+    fit: "ثبت شرکت، مجوز فعالیت، ویزا، بانک و حسابداری برای VibeLab در امارات",
+    template: `Hello Osome team,\n\nI am exploring UAE company setup options for VibeLab, an AI-powered learning and portfolio platform for creators, freelancers and small businesses. The platform is live at https://v2.vibelab.ir and currently runs on Cloudflare Workers with Cloudflare D1 database.\n\nVibeLab helps non-technical users build AI content kits, live websites/MVPs, resume-ready portfolios and job-finding workflows. We are preparing the product for a six-week AI program and potential UAE/MENA expansion.\n\nI would like guidance on the best UAE setup option for an AI education/software startup, including Free Zone vs Mainland, licensing activity, founder visa options, bank account setup, expected costs, and timeline.\n\nContact: Soheil — soheil.power@gmail.com — +1-208-5033653\nWebsite: https://v2.vibelab.ir\n\nBest,\nSoheil\nVibeLab`,
   },
   {
     title: "Presight AI-Startup Accelerator",
     region: "UAE / Abu Dhabi",
-    status: "نیازمند بررسی دوره بعدی",
+    status: "نیازمند بررسی cohort",
+    deadline: "Cohort-based",
+    responseTime: "۲ تا ۴ هفته",
+    followUp: "۱۴ روز بعد",
+    contact: "Accelerator form",
     url: "https://www.presight.ai/accelerator",
-    fit: "AI startup، محصول آماده، اتصال به اکوسیستم G42 و بازارهای منطقه",
-    template: `Startup: VibeLab
-Website: https://v2.vibelab.ir
-Founder contact: Soheil — soheil.power@gmail.com — +1-2085033653
-
-VibeLab is an AI-powered learning and portfolio platform for non-technical creators, freelancers and small businesses. It helps users turn ideas into content kits, AI-generated videos, live websites, resumes and job-ready portfolios through a structured six-week program.
-
-We are applying because the UAE is a strong launch market for practical AI adoption, SME digitization and workforce upskilling. VibeLab turns AI literacy into measurable outputs: content, websites, MVPs and job-ready portfolios.`,
+    fit: "شتاب‌دهنده AI برای محصول آماده، شبکه G42، بازار UAE و توسعه منطقه‌ای",
+    template: `Startup: VibeLab\nWebsite: https://v2.vibelab.ir\nFounder contact: Soheil — soheil.power@gmail.com — +1-208-5033653\n\nVibeLab is an AI-powered learning and portfolio platform for non-technical creators, freelancers and small businesses. It helps users turn ideas into content kits, AI-generated videos, live websites, resumes and job-ready portfolios through a structured six-week program.\n\nWe are applying because the UAE is a strong launch market for practical AI adoption, SME digitization and workforce upskilling. VibeLab turns AI literacy into measurable outputs: content, websites, MVPs and job-ready portfolios.`,
   },
   {
     title: "Dubai Future / DCAI AI Accelerator",
     region: "UAE / Dubai",
-    status: "فراخوان دوره بعدی را رصد کن",
+    status: "رصد فراخوان بعدی",
+    deadline: "Call-based",
+    responseTime: "۲ تا ۶ هفته",
+    followUp: "۱۴ روز بعد",
+    contact: "Dubai Future form/news",
     url: "https://www.dubaifuture.ae/",
-    fit: "AI برای دولت، رسانه، آموزش و خدمات شهری؛ مناسب نسخه انگلیسی/Pitch",
-    template: `VibeLab can support practical AI upskilling for creators, SMEs and non-technical teams by combining structured learning with production-ready outputs: AI content kits, websites, portfolios and job-finding workflows.
-
-We are interested in UAE/Dubai pilots for AI education, SME digitization and workforce readiness. Live product: https://v2.vibelab.ir`,
+    fit: "AI برای دولت، رسانه، آموزش و خدمات؛ مناسب نسخه انگلیسی و pitch deck",
+    template: `VibeLab can support practical AI upskilling for creators, SMEs and non-technical teams by combining structured learning with production-ready outputs: AI content kits, websites, portfolios and job-finding workflows.\n\nWe are interested in UAE/Dubai pilots for AI education, SME digitization and workforce readiness. Live product: https://v2.vibelab.ir`,
   },
   {
-    title: "Mastercard Lighthouse UAE / AI Office",
-    region: "UAE / Fintech + AI ecosystem",
+    title: "Mastercard Lighthouse UAE",
+    region: "UAE / AI + commerce",
     status: "رصد و آماده‌سازی pitch",
+    deadline: "Call-based",
+    responseTime: "۲ تا ۶ هفته",
+    followUp: "۱۴ روز بعد",
+    contact: "Program/newsroom",
     url: "https://www.mastercard.com/news/eemea/en/newsroom/",
-    fit: "برای نسخه‌هایی که AI + SME finance / commerce / trust داشته باشند",
+    fit: "اگر VibeLab برای SME commerce, trust, payments یا AI adoption position شود",
     template: `VibeLab helps micro and small businesses adopt AI by creating market-ready content, live websites and portfolio assets. For a UAE pilot, VibeLab can be positioned as an AI enablement layer for SMEs, creators and early-stage founders preparing to digitize sales, content and customer acquisition.`,
   },
   {
-    title: "Turkey / MENA Market Check",
-    region: "Turkey / Istanbul + Remote",
-    status: "پیش‌نویس عمومی",
-    url: "https://www.invest.gov.tr/",
-    fit: "اگر منظور ترکیه باشد: بررسی ثبت شرکت، بازار آموزش AI، فروش B2B و همکاری محلی",
-    template: `Hello,\n\nI am exploring Turkey/MENA expansion options for VibeLab, an AI-powered learning and portfolio platform. VibeLab helps creators, freelancers and small businesses build AI content kits, live websites, resumes and job-ready portfolios.\n\nWebsite: https://v2.vibelab.ir\nContact: Soheil — soheil.power@gmail.com — +1-2085033653\n\nI would like to understand company setup options, suitable business activity, banking, tax, and partnership opportunities for an AI education/software startup.`,
+    title: "NVIDIA Inception",
+    region: "Global",
+    status: "Rolling / مناسب اقدام",
+    deadline: "Rolling",
+    responseTime: "۱ تا ۳ هفته",
+    followUp: "۱۰ روز بعد",
+    contact: "Startup application",
+    url: "https://www.nvidia.com/en-us/startups/",
+    fit: "اعتبار GPU/AI، شبکه فنی و اعتبار برند برای AI startup بدون نیاز اولیه به ویزا",
+    template: `VibeLab is an AI-powered learning and portfolio platform using AI workflows to help non-technical users create content kits, websites, resumes and job-ready portfolios. We are looking for AI infrastructure, technical support and ecosystem access to expand the platform.`,
+  },
+  {
+    title: "Microsoft for Startups Founders Hub",
+    region: "Global",
+    status: "Rolling / مناسب اقدام",
+    deadline: "Rolling",
+    responseTime: "فوری تا ۲ هفته",
+    followUp: "۷ روز بعد",
+    contact: "Founders Hub portal",
+    url: "https://www.microsoft.com/startups",
+    fit: "Azure/OpenAI credits، ابزار SaaS و پشتیبانی برای محصول AI education",
+    template: `VibeLab is a live AI learning and portfolio platform at https://v2.vibelab.ir. We help creators, freelancers and SMEs turn AI learning into market-ready outputs: content kits, websites, MVPs, resumes and outreach workflows. We are seeking cloud and AI credits to scale the product.`,
+  },
+  {
+    title: "Google for Startups Accelerator: AI / MENA",
+    region: "Global / MENA",
+    status: "Cohort-based",
+    deadline: "بر اساس cohort",
+    responseTime: "۲ تا ۶ هفته",
+    followUp: "۱۴ روز بعد",
+    contact: "Google startup form",
+    url: "https://startup.google.com/accelerator/",
+    fit: "AI startup، Google Cloud، MENA expansion، آموزش AI و SME digitization",
+    template: `VibeLab is an AI-powered learning and portfolio platform for non-technical creators, freelancers and small businesses. We are preparing a six-week AI portfolio program for MENA users and seek mentorship, cloud support and go-to-market help.`,
+  },
+  {
+    title: "Techstars Anywhere",
+    region: "Remote / Americas timezone",
+    status: "Cohort-based",
+    deadline: "بر اساس batch",
+    responseTime: "۲ تا ۶ هفته",
+    followUp: "۱۴ روز بعد",
+    contact: "Techstars application",
+    url: "https://www.techstars.com/accelerators/anywhere",
+    fit: "Remote-first accelerator؛ مناسب اگر time zone و سفرهای کوتاه ممکن باشد",
+    template: `VibeLab is a remote-ready AI learning and portfolio platform. It helps non-technical users create AI content kits, live websites, resumes and client outreach workflows. We are looking for mentorship, network and early-stage acceleration.`,
+  },
+  {
+    title: "Creative Destruction Lab (CDL)",
+    region: "Canada / Global sites",
+    status: "Canada eligibility را چک کن",
+    deadline: "Annual cohorts",
+    responseTime: "۴ تا ۸ هفته",
+    followUp: "۲۱ روز بعد",
+    contact: "CDL apply/contact",
+    url: "https://creativedestructionlab.com/",
+    fit: "AI/deep-tech mentorship؛ برای Canada pathway خوب است ولی visa/PR تضمین نمی‌کند",
+    template: `VibeLab is an AI-enabled platform for practical AI education, portfolio generation and workforce readiness. The product is live and uses Cloudflare Workers + D1. We are exploring mentor-driven acceleration to validate the model for MENA and global markets.`,
+  },
+  {
+    title: "DMZ / Toronto Metropolitan University",
+    region: "Canada / Toronto",
+    status: "نیازمند بررسی اقامت/حضور",
+    deadline: "Cohort-based",
+    responseTime: "۲ تا ۴ هفته",
+    followUp: "۱۴ روز بعد",
+    contact: "DMZ application/contact",
+    url: "https://dmz.torontomu.ca/",
+    fit: "شبکه tech Canada؛ ممکن است حضور Toronto یا traction لازم باشد؛ برای بدون ویزا ریسک دارد",
+    template: `VibeLab is a live AI-powered learning and portfolio platform. We are exploring Canadian ecosystem opportunities, mentorship and potential incorporation/market entry options. We are currently based outside Canada and would like to understand eligibility for international founders.`,
   },
 ];
 
@@ -198,7 +257,7 @@ export default function AdminDashboard({ admin, initialData, initialAiData, init
             <article className="admin-insight-card"><p>YOUTUBE</p><h2>مسیرهای ویدیویی مکمل</h2>{youtubeLearningResources.map((item) => <a key={item.title} href={item.url} target="_blank" rel="noreferrer"><b>{item.title}</b><small>{item.channel}</small></a>)}</article>
             <article className="admin-insight-card"><p>JOB MODEL</p><h2>مدل پیدا کردن کار برای هنرجو</h2>{jobPlaybook.map((item) => <div key={item.title} className="job-playbook-item"><b>{item.title}</b><small>{item.detail}</small></div>)}</article>
           </section>
-          <section className="opportunity-center" id="opportunity-center"><div className="opportunity-head"><div><p>UAE / ACCELERATOR FORMS</p><h2>فراخوان‌ها و فرم‌های آماده کپی</h2><span>برای ثبت شرکت، برنامه‌های شتاب‌دهنده و مکاتبه با سازمان‌ها؛ متن‌ها آماده‌اند و قبل از ارسال باید بازبینی شوند.</span></div><a href="https://github.com/Websites-by-AI/Ai-coirse_1_bootcamp_2day/blob/main/docs/UAE_FORM_PACK.md" target="_blank" rel="noreferrer">پک فرم‌ها</a></div><div className="opportunity-grid">{opportunityCalls.map((item) => <article className="opportunity-card" key={item.title}><div className="opportunity-card-top"><span>{item.region}</span><em>{item.status}</em></div><h3>{item.title}</h3><p>{item.fit}</p><textarea readOnly value={item.template} aria-label={`متن فرم ${item.title}`} /><div className="opportunity-actions"><a href={item.url} target="_blank" rel="noreferrer">باز کردن فرم <AdminIcon name="arrow" size={14} /></a><button type="button" onClick={() => copyOpportunityTemplate(item.title, item.template)}>کپی متن فرم</button></div></article>)}</div></section>
+          <section className="opportunity-center" id="opportunity-center"><div className="opportunity-head"><div><p>UAE / ACCELERATOR FORMS</p><h2>فراخوان‌ها و فرم‌های آماده کپی</h2><span>برای ثبت شرکت، برنامه‌های شتاب‌دهنده و مکاتبه با سازمان‌ها؛ متن‌ها آماده‌اند و قبل از ارسال باید بازبینی شوند.</span></div><a href="https://github.com/Websites-by-AI/Ai-coirse_1_bootcamp_2day/blob/main/docs/UAE_FORM_PACK.md" target="_blank" rel="noreferrer">پک فرم‌ها</a></div><div className="opportunity-grid">{opportunityCalls.map((item) => <article className="opportunity-card" key={item.title}><div className="opportunity-card-top"><span>{item.region}</span><em>{item.status}</em></div><h3>{item.title}</h3><p>{item.fit}</p><div className="opportunity-meta"><span>Deadline: <b>{item.deadline}</b></span><span>Answer: <b>{item.responseTime}</b></span><span>Follow-up: <b>{item.followUp}</b></span><span>Contact: <b>{item.contact}</b></span></div><textarea readOnly value={item.template} aria-label={`متن فرم ${item.title}`} /><div className="opportunity-actions"><a href={item.url} target="_blank" rel="noreferrer">باز کردن فرم <AdminIcon name="arrow" size={14} /></a><button type="button" onClick={() => copyOpportunityTemplate(item.title, item.template)}>کپی متن فرم</button></div></article>)}</div></section>
           <SecurityCenter initialReport={initialSecurityReport} />
           <SetupReleaseCenter releases={releases} githubUrl={githubUrl} connectedProviders={initialAiData.providers.filter((provider) => provider.lastStatus === "connected").length} />
           <AiProviderManager initialData={initialAiData} />
