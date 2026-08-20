@@ -1,0 +1,16 @@
+{
+  "name": "VibeLab",
+  "short_name": "VibeLab",
+  "description": "AI learning, portfolio and job-ready platform",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a1022",
+  "theme_color": "#5368ea",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
