@@ -100,6 +100,19 @@ const startupCallsTeaser = [
   { name: 'Canada Track', note: 'CDL و DMZ؛ با توجه به محدودیت ویزا بررسی دقیق لازم دارد', status: 'مشروط' },
 ];
 
+const githubAgentSkills = [
+  { title: 'Repository Audit', detail: 'بررسی ساختار repo، dependencyها، envها و مسیر deploy برای پیدا کردن ریسک‌ها.', icon: 'search' as IconName },
+  { title: 'Issue Triage', detail: 'تبدیل خطاها و درخواست‌ها به issueهای قابل اجرا با priority و acceptance criteria.', icon: 'check' as IconName },
+  { title: 'Pull Request Review', detail: 'بازبینی تغییرات، ریسک امنیتی، regression و پیشنهاد refactor قبل از merge.', icon: 'code' as IconName },
+  { title: 'CI/CD Fixes', detail: 'رفع build، typecheck، lint و deploy pipeline برای Vercel، Cloudflare و GitHub Actions.', icon: 'tool' as IconName },
+  { title: 'Cloudflare Deploy', detail: 'اتصال Workers، D1، Routes، secrets و health check برای production.', icon: 'globe' as IconName },
+  { title: 'Database Migration', detail: 'طراحی و اجرای migration برای D1/Postgres و تست ذخیره واقعی داده‌ها.', icon: 'layers' as IconName },
+  { title: 'API Integration', detail: 'اتصال APIهای AI، music، email، auth و ساخت adapter امن با token و fallback.', icon: 'link' as IconName },
+  { title: 'Security Pass', detail: 'بررسی session، cookie، secretها، rate limit، Turnstile و مسیرهای حساس.', icon: 'target' as IconName },
+  { title: 'Docs & Playbooks', detail: 'ساخت README، deploy guide، startup call CRM و متن‌های آماده فرم‌ها.', icon: 'copy' as IconName },
+  { title: 'Product UX Sprint', detail: 'بهبود dashboard، sidebar، onboarding، رزومه، job finder و landing برای conversion.', icon: 'rocket' as IconName },
+];
+
 export default function HomeClient() {
   const [theme, setTheme] = useState<Theme>('dark');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -150,6 +163,7 @@ export default function HomeClient() {
     { href: '#outcomes', label: 'خروجی‌های شما' },
     { href: '#market', label: 'مسیر کار' },
     { href: '#startup-calls', label: 'استارتاپ' },
+    { href: '#agent-skills', label: 'Agent Skills' },
     { href: '/education', label: 'مرکز آموزش' },
     { href: '/login', label: 'ورود' },
     { href: '/register', label: 'ثبت‌نام' },
@@ -234,6 +248,8 @@ export default function HomeClient() {
       </section>
 
       <section id="market" className="market-section"><div className="vibe-container"><div className="section-intro centered"><div className="vibe-eyebrow"><Icon name="target" size={15} /> مسیر بازار و کار</div><h2>این مهارت‌ها برای چه کاری <span>در ایران و بازار جهانی</span> کاربرد دارد؟</h2><p>VibeLab فقط آموزش ابزار نیست؛ خروجی پنل کاربر باید به رزومه، نمونه‌کار و مسیر پیدا کردن پروژه وصل شود.</p></div><div className="market-grid">{marketPaths.map((item) => <article key={item.title} className="market-card"><span><Icon name={item.icon} size={22} /></span><small>{item.market}</small><h3>{item.title}</h3><p>{item.description}</p><em>{item.income}</em></article>)}</div><div className="market-cta"><div><b>در پنل کاربر، برای همین مسیرها رزومه، پروژه، پیام معرفی و readiness score ساخته می‌شود.</b><p>اگر کاربر مشتاق تولید وب‌سایت یا تولید محتوا باشد، مسیر شغلی پیشنهادی و تمرین‌های YouTube/Job Finder را می‌بیند.</p></div><a href="/panel" className="vibe-primary"><Icon name="rocket" size={16} /> مشاهده پنل کاربر</a></div></div></section>
+
+      <section id="agent-skills" className="agent-skills-section"><div className="vibe-container"><div className="agent-skills-head"><div><div className="vibe-eyebrow"><Icon name="code" size={15} /> GitHub + Claude/Agent Skills</div><h2>یک لایه‌ی اجرایی برای بهتر کردن محصول، نه فقط تولید متن.</h2><p>این مهارت‌ها برای مدیریت repo، رفع خطا، deploy، اتصال API و آماده‌سازی VibeLab به عنوان استارتاپ استفاده می‌شوند.</p></div><a href="https://github.com/Websites-by-AI/Ai-coirse_1_bootcamp_2day" target="_blank" rel="noreferrer" className="vibe-secondary"><Icon name="code" size={16} /> مشاهده GitHub</a></div><div className="agent-skill-grid">{githubAgentSkills.map((skill, index) => <article key={skill.title} className="agent-skill-card"><span><Icon name={skill.icon} size={20} /></span><small>{String(index + 1).padStart(2, '0')}</small><h3>{skill.title}</h3><p>{skill.detail}</p></article>)}</div></div></section>
 
       <section id="startup-calls" className="startup-calls-section"><div className="vibe-container"><div className="startup-calls-layout"><div><div className="vibe-eyebrow coral"><Icon name="rocket" size={15} /> مسیر استارتاپ و فراخوان‌ها</div><h2>VibeLab برای اپلای، ثبت شرکت و همکاری بین‌المللی آماده می‌شود.</h2><p>در پنل ادمین، ۱۰ فراخوان و مسیر مرتبط با امارات، کانادا و برنامه‌های جهانی ثبت شده؛ متن فرم‌ها آماده کپی است و زمان پیگیری هر مورد مشخص شده است.</p><a href="/admin" className="vibe-primary"><Icon name="arrow" size={16} /> ورود ادمین و دیدن فراخوان‌ها</a></div><div className="startup-calls-list">{startupCallsTeaser.map((item) => <article key={item.name}><span>{item.status}</span><b>{item.name}</b><p>{item.note}</p></article>)}</div></div></div></section>
 
