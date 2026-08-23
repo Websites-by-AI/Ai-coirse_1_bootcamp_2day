@@ -64,8 +64,12 @@ function keyboard() {
         { text: "پنل کاربر", url: `${SITE_URL}/panel` },
       ],
       [
-        { text: "سایت اصلی", url: SITE_URL },
+        { text: "کارآموزی + آموزش", url: `${SITE_URL}/internship` },
         { text: "مسیر استارتاپ", url: `${SITE_URL}/#startup-calls` },
+      ],
+      [
+        { text: "سایت اصلی", url: SITE_URL },
+        { text: "ربات تلگرام", url: BOT_URL },
       ],
     ],
   };
@@ -77,9 +81,10 @@ function replyFor(text: string) {
     return "سلام 👋\nبه ربات VibeLab خوش آمدی.\nاینجا می‌توانی سریع به ثبت‌نام، پنل کاربر، مسیر رزومه و برنامه ساخت محتوا/وب‌سایت با AI دسترسی داشته باشی.";
   }
   if (normalized.startsWith("/help")) {
-    return "دستورها:\n/start شروع\n/register لینک ثبت‌نام\n/panel پنل کاربر\n/startup مسیر فراخوان‌ها و استارتاپ\n/music برنامه اتصال AI Music\n/health وضعیت سایت";
+    return "دستورها:\n/start شروع\n/register لینک ثبت‌نام\n/internship کارآموزی طراحی سایت و تولید محتوا\n/panel پنل کاربر\n/startup مسیر فراخوان‌ها و استارتاپ\n/music برنامه اتصال AI Music\n/health وضعیت سایت";
   }
   if (normalized.startsWith("/register")) return `ثبت‌نام و سنجش مسیر:\n${SITE_URL}/register`;
+  if (normalized.startsWith("/internship")) return `کارآموزی + آموزش طراحی سایت و تولید محتوا با AI:\n${SITE_URL}/internship`;
   if (normalized.startsWith("/panel")) return `پنل کاربر و رزومه/پروژه:\n${SITE_URL}/panel`;
   if (normalized.startsWith("/startup")) return `مسیر استارتاپ، فراخوان‌ها و آماده‌سازی UAE/Canada/Global:\n${SITE_URL}/#startup-calls`;
   if (normalized.startsWith("/music")) return "ماژول AI Music در حال آماده‌سازی است: ACE-Step/HuggingFace، fal.ai، WaveSpeed، MiniMax و Mureka برای تست آهنگ فارسی بررسی شده‌اند.";
