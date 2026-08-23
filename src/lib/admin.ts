@@ -61,6 +61,20 @@ export type DashboardStudentUser = {
   createdAt: string;
 };
 
+export type DashboardInternshipApplication = {
+  id: number;
+  fullName: string;
+  email: string;
+  phone: string;
+  track: string;
+  locationId: string;
+  resumeText: string;
+  portfolioUrl: string | null;
+  availability: string | null;
+  status: string;
+  createdAt: string;
+};
+
 export type GoogleIdentity = {
   subject: string;
   email: string;

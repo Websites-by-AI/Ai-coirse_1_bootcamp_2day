@@ -1,7 +1,7 @@
 import { randomBytes } from "crypto";
 import { hashPassword, passwordMatches } from "@/lib/password";
 import { getVibelabD1, type D1DatabaseBinding } from "@/lib/cloudflare-d1";
-import type { DashboardAssessment, DashboardEnrollment, DashboardStudentUser } from "@/lib/admin";
+import type { DashboardAssessment, DashboardEnrollment, DashboardInternshipApplication, DashboardStudentUser } from "@/lib/admin";
 
 export const D1_DEMO_ADMIN = {
   username: "admin@vibelab.ir",
@@ -41,6 +41,19 @@ async function ensureD1AdminSchema(db: D1DatabaseBinding) {
     FOREIGN KEY (user_id) REFERENCES vibelab_student_users(id) ON DELETE CASCADE
   )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_vibelab_admin_sessions_user ON vibelab_admin_sessions(user_id)`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS vibelab_internship_applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    track TEXT NOT NULL,
+    location_id TEXT NOT NULL,
+    resume_text TEXT NOT NULL,
+    portfolio_url TEXT,
+    availability TEXT,
+    status TEXT NOT NULL DEFAULT 'جدید',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run();
   schemaReady = true;
 }
 
@@ -147,7 +160,28 @@ export async function d1GetDashboardData() {
       LIMIT 24`)
     .all<{ id: number; full_name: string; email: string; goal: string; experience_level: string; weekly_hours: number; score: number; fit_level: string; recommendation: string; analysis_source: string; created_at: string }>();
 
-  const users: DashboardStudentUser[] = (usersResult.results ?? []).map((row) => ({
+  const internshipResult = await db
+    .prepare(`SELECT id, full_name, email, phone, track, location_id, resume_text, portfolio_url, availability, status, created_at
+      FROM vibelab_internship_applications
+      ORDER BY id DESC
+      LIMIT 20`)
+    .all<{ id: number; full_name: string; email: string; phone: string; track: string; location_id: string; resume_text: string; portfolio_url: string | null; availability: string | null; status: string; created_at: string }>();
+
+  const internshipApplications: DashboardInternshipApplication[] = (internshipResult.results ?? []).map((row) => ({
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    track: row.track,
+    locationId: row.location_id,
+    resumeText: row.resume_text,
+    portfolioUrl: row.portfolio_url,
+    availability: row.availability,
+    status: row.status,
+    createdAt: row.created_at,
+  }));
+
+  const users: DashboardStudentUser[] = (usersResult.results ?? []).map((row) => ({ 
     id: row.id,
     fullName: row.full_name,
     email: row.email,
@@ -186,6 +220,7 @@ export async function d1GetDashboardData() {
     registrations,
     assessments,
     users,
+    internshipApplications,
     stats: {
       total: registrations.length,
       pending: registrations.filter((item) => item.status === "در انتظار").length,

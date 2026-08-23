@@ -84,7 +84,7 @@ function replyFor(text: string) {
     return "دستورها:\n/start شروع\n/register لینک ثبت‌نام\n/internship کارآموزی طراحی سایت و تولید محتوا\n/panel پنل کاربر\n/startup مسیر فراخوان‌ها و استارتاپ\n/music برنامه اتصال AI Music\n/health وضعیت سایت";
   }
   if (normalized.startsWith("/register")) return `ثبت‌نام و سنجش مسیر:\n${SITE_URL}/register`;
-  if (normalized.startsWith("/internship")) return `کارآموزی + آموزش طراحی سایت و تولید محتوا با AI:\n${SITE_URL}/internship`;
+  if (normalized.startsWith("/internship")) return `کارآموزی + آموزش طراحی سایت و تولید محتوا با AI:\n${SITE_URL}/internship\n\nمدل نقاط آموزشی: نارمک هفت حوض، ونک/میرداماد، انقلاب، سعادت‌آباد/پونک و کرج. ۳۰ دقیقه اول رایگان است؛ بعد از آن هزینه فضای کار اشتراکی با کارآموز است. ابتدا رزومه/معرفی کوتاه را در فرم صفحه کارآموزی ثبت کن.`;
   if (normalized.startsWith("/panel")) return `پنل کاربر و رزومه/پروژه:\n${SITE_URL}/panel`;
   if (normalized.startsWith("/startup")) return `مسیر استارتاپ، فراخوان‌ها و آماده‌سازی UAE/Canada/Global:\n${SITE_URL}/#startup-calls`;
   if (normalized.startsWith("/music")) return "ماژول AI Music در حال آماده‌سازی است: ACE-Step/HuggingFace، fal.ai، WaveSpeed، MiniMax و Mureka برای تست آهنگ فارسی بررسی شده‌اند.";

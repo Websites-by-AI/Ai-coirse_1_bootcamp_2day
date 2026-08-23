@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import type { AiAlert, AiProviderDashboardItem } from "@/lib/ai";
 import type { SecurityReport } from "@/lib/security";
 import type { ReleaseNote } from "@/lib/releases";
-import type { DashboardAssessment, DashboardEnrollment, DashboardStudentUser } from "@/lib/admin";
+import type { DashboardAssessment, DashboardEnrollment, DashboardInternshipApplication, DashboardStudentUser } from "@/lib/admin";
 import AiProviderManager from "./ai-provider-manager";
 import AssessmentSandbox from "./assessment-sandbox";
 import SecurityCenter from "./security-center";
 import SetupReleaseCenter from "./setup-release-center";
 import StudentAssessmentList from "./student-assessment-list";
 
-type DashboardData = { registrations: DashboardEnrollment[]; assessments: DashboardAssessment[]; users?: DashboardStudentUser[]; stats: { total: number; pending: number; confirmed: number; newLeads: number; students: number; readyStudents: number } };
+type DashboardData = { registrations: DashboardEnrollment[]; assessments: DashboardAssessment[]; users?: DashboardStudentUser[]; internshipApplications?: DashboardInternshipApplication[]; stats: { total: number; pending: number; confirmed: number; newLeads: number; students: number; readyStudents: number } };
 type AiDashboardData = { providers: AiProviderDashboardItem[]; alerts: AiAlert[] };
 type StatusFilter = "همه" | "جدید" | "در انتظار" | "تأیید شده" | "لغو شده";
 
@@ -189,6 +189,7 @@ export default function AdminDashboard({ admin, initialData, initialAiData, init
   const [savingId, setSavingId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const users = initialData.users ?? [];
+  const internshipApplications = initialData.internshipApplications ?? [];
   const readyEmails = new Set(initialData.assessments.filter((item) => item.fitLevel === "آماده برای ماراتن" || item.score >= 75).map((item) => item.email));
 
   const stats = useMemo(() => ({ 
@@ -243,7 +244,7 @@ export default function AdminDashboard({ admin, initialData, initialAiData, init
     <main dir="rtl" className="admin-app">
       <aside className="admin-sidebar">
         <a href="/" className="admin-brand"><span>V</span><b>VibeLab</b><small>ADMIN</small></a>
-        <nav className="admin-side-nav"><a className="active" href="#overview"><AdminIcon name="grid" /> نمای کلی</a><a href="#registrations"><AdminIcon name="users" /> ثبت‌نام‌ها <em>{stats.total}</em></a><a href="#workshop"><AdminIcon name="calendar" /> ماراتن دو روزه</a><a href="#ai-apis"><AdminIcon name="settings" /> AI API و هشدارها</a><a href="#assessment-sandbox"><AdminIcon name="settings" /> تست AI Scanner</a><a href="#security-tests"><AdminIcon name="settings" /> تست‌های امنیتی</a><a href="#release-center"><AdminIcon name="settings" /> نسخه‌ها و راه‌اندازی</a><a href="#users-model"><AdminIcon name="database" /> مدل کاربران</a><a href="#opportunity-center"><AdminIcon name="mail" /> فراخوان‌ها و فرم‌ها</a><a href="#student-analysis"><AdminIcon name="spark" /> تحلیل کاربران</a><a href="/"><AdminIcon name="spark" /> صفحه‌ی سایت</a></nav>
+        <nav className="admin-side-nav"><a className="active" href="#overview"><AdminIcon name="grid" /> نمای کلی</a><a href="#registrations"><AdminIcon name="users" /> ثبت‌نام‌ها <em>{stats.total}</em></a><a href="#workshop"><AdminIcon name="calendar" /> ماراتن دو روزه</a><a href="#ai-apis"><AdminIcon name="settings" /> AI API و هشدارها</a><a href="#assessment-sandbox"><AdminIcon name="settings" /> تست AI Scanner</a><a href="#security-tests"><AdminIcon name="settings" /> تست‌های امنیتی</a><a href="#release-center"><AdminIcon name="settings" /> نسخه‌ها و راه‌اندازی</a><a href="#users-model"><AdminIcon name="database" /> مدل کاربران</a><a href="#internship-apps"><AdminIcon name="users" /> کارآموزی <em>{internshipApplications.length}</em></a><a href="#opportunity-center"><AdminIcon name="mail" /> فراخوان‌ها و فرم‌ها</a><a href="#student-analysis"><AdminIcon name="spark" /> تحلیل کاربران</a><a href="/"><AdminIcon name="spark" /> صفحه‌ی سایت</a></nav>
         <div className="admin-side-bottom"><div className="admin-db-chip"><span><AdminIcon name="database" size={16} /></span><div><b>PostgreSQL</b><small><i /> اتصال برقرار است</small></div></div><button onClick={logout}><AdminIcon name="exit" /> خروج از پنل</button></div>
       </aside>
       <section className="admin-main">
@@ -262,6 +263,7 @@ export default function AdminDashboard({ admin, initialData, initialAiData, init
 URL: ${item.url}
 Expected answer: ${item.responseTime}
 Follow-up: ${item.followUp}`)}`}>ارسال به ایمیل</a></td></tr>)}</tbody></table></div></section>
+          <section className="internship-admin-section" id="internship-apps"><div className="admin-table-header"><div><p>INTERNSHIP APPLICATIONS</p><h2>درخواست‌های کارآموزی</h2></div><span>{internshipApplications.length.toLocaleString("fa-IR")} درخواست</span></div><div className="internship-admin-grid">{internshipApplications.map((item) => <article key={item.id}><div><b>{item.fullName}</b><small>{item.email}<br />{item.phone}</small></div><span>{item.track}</span><em>{item.locationId}</em><p>{item.resumeText.slice(0, 180)}{item.resumeText.length > 180 ? "..." : ""}</p><small>زمان آزاد: {item.availability || "ثبت نشده"}</small></article>)}{internshipApplications.length === 0 && <div className="admin-empty">هنوز درخواست کارآموزی ثبت نشده است.</div>}</div></section>
           <SecurityCenter initialReport={initialSecurityReport} />
           <SetupReleaseCenter releases={releases} githubUrl={githubUrl} connectedProviders={initialAiData.providers.filter((provider) => provider.lastStatus === "connected").length} />
           <AiProviderManager initialData={initialAiData} />

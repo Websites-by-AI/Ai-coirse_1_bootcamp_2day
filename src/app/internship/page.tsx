@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { internshipLocations } from "@/lib/internship";
+import InternshipApplication from "./internship-application";
 
 export const metadata: Metadata = {
   title: "کارآموزی VibeLab | طراحی سایت و تولید محتوا با AI",
@@ -77,6 +79,17 @@ export default function InternshipPage() {
 
       <section className="internship-container internship-section">
         <div className="internship-section-head">
+          <p>SNAPP-STYLE HUBS</p>
+          <h2>۵ نقطه آموزشی پیشنهادی در تهران و کرج</h2>
+          <span>مدل ما شبیه شبکه نقطه‌ای است: کارآموز نزدیک‌ترین نقطه را انتخاب می‌کند. ۳۰ دقیقه اول برای آشنایی رایگان است؛ بعد از آن هزینه فضای کار اشتراکی یا کافه‌کاری با خود کارآموز است.</span>
+        </div>
+        <div className="internship-location-grid">
+          {internshipLocations.map((item) => <article key={item.id}><small>{item.city} · {item.area}</small><h3>{item.title}</h3><p>{item.bestFor}</p><b>{item.price}</b><em>{item.access}</em></article>)}
+        </div>
+      </section>
+
+      <section className="internship-container internship-section">
+        <div className="internship-section-head">
           <p>PROGRAM</p>
           <h2>برنامه ۴ هفته‌ای پیشنهادی</h2>
         </div>
@@ -111,6 +124,10 @@ export default function InternshipPage() {
             <li>برنامه هفتگی برای پیدا کردن پروژه</li>
           </ul>
         </article>
+      </section>
+
+      <section className="internship-container internship-section">
+        <InternshipApplication />
       </section>
 
       <section className="internship-cta">
