@@ -50,13 +50,15 @@ export default function ConfigWarningModal({
     };
   }, [dismissed, initialStatus]);
 
-  const issues = status?.issues ?? [];
+  const issues = (status?.issues ?? []).filter(
+    (issue) => issue.id !== "database_missing" && issue.id !== "database_unreachable",
+  );
   const hasCritical = useMemo(
     () => issues.some((issue) => issue.severity === "critical"),
     [issues],
   );
 
-  // No issues => no FAB, no modal.
+  // No actionable production issues => no FAB, no modal. Cloudflare D1 is the primary DB for this deployment.
   if (!status || issues.length === 0) return null;
 
   return (
