@@ -161,11 +161,11 @@ export async function d1GetDashboardData() {
     .all<{ id: number; full_name: string; email: string; goal: string; experience_level: string; weekly_hours: number; score: number; fit_level: string; recommendation: string; analysis_source: string; created_at: string }>();
 
   const internshipResult = await db
-    .prepare(`SELECT id, full_name, email, phone, track, location_id, resume_text, portfolio_url, availability, status, created_at
+    .prepare(`SELECT id, full_name, email, phone, track, location_id, resume_text, portfolio_url, availability, source, utm_source, utm_medium, utm_campaign, referrer, status, created_at
       FROM vibelab_internship_applications
       ORDER BY id DESC
       LIMIT 20`)
-    .all<{ id: number; full_name: string; email: string; phone: string; track: string; location_id: string; resume_text: string; portfolio_url: string | null; availability: string | null; status: string; created_at: string }>();
+    .all<{ id: number; full_name: string; email: string; phone: string; track: string; location_id: string; resume_text: string; portfolio_url: string | null; availability: string | null; source: string | null; utm_source: string | null; utm_medium: string | null; utm_campaign: string | null; referrer: string | null; status: string; created_at: string }>();
 
   const internshipApplications: DashboardInternshipApplication[] = (internshipResult.results ?? []).map((row) => ({
     id: row.id,
@@ -177,6 +177,11 @@ export async function d1GetDashboardData() {
     resumeText: row.resume_text,
     portfolioUrl: row.portfolio_url,
     availability: row.availability,
+    source: row.source,
+    utmSource: row.utm_source,
+    utmMedium: row.utm_medium,
+    utmCampaign: row.utm_campaign,
+    referrer: row.referrer,
     status: row.status,
     createdAt: row.created_at,
   }));

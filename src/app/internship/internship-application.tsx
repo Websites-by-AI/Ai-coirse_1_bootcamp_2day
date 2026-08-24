@@ -1,11 +1,24 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { internshipLocations } from "@/lib/internship";
 
 export default function InternshipApplication() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [tracking, setTracking] = useState({ source: "direct", utmSource: "", utmMedium: "", utmCampaign: "", referrer: "" });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const source = params.get("source") || params.get("utm_source") || "direct";
+    setTracking({
+      source,
+      utmSource: params.get("utm_source") || source,
+      utmMedium: params.get("utm_medium") || "",
+      utmCampaign: params.get("utm_campaign") || "",
+      referrer: document.referrer || "",
+    });
+  }, []);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -26,6 +39,11 @@ export default function InternshipApplication() {
           resumeText: data.get("resumeText"),
           portfolioUrl: data.get("portfolioUrl"),
           availability: data.get("availability"),
+          source: tracking.source,
+          utmSource: tracking.utmSource,
+          utmMedium: tracking.utmMedium,
+          utmCampaign: tracking.utmCampaign,
+          referrer: tracking.referrer,
         }),
       });
       const result = (await response.json()) as { error?: string };
@@ -45,6 +63,7 @@ export default function InternshipApplication() {
         <p>APPLY</p>
         <h2>درخواست کارآموزی</h2>
         <span>اول رزومه/معرفی کوتاه را می‌گیریم، بعد مسیر کارآموزی طراحی سایت یا تولید محتوا پیشنهاد می‌شود.</span>
+        {tracking.source !== "direct" && <em className="internship-source-chip">ورودی از: {tracking.source}</em>}
       </div>
       <label>نام و نام خانوادگی<input name="fullName" required placeholder="مثلاً سهیل ..." /></label>
       <label>ایمیل<input name="email" type="email" required placeholder="you@example.com" dir="ltr" /></label>

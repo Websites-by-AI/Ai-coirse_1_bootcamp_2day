@@ -71,6 +71,11 @@ export type DashboardInternshipApplication = {
   resumeText: string;
   portfolioUrl: string | null;
   availability: string | null;
+  source: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  referrer: string | null;
   status: string;
   createdAt: string;
 };

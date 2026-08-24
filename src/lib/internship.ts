@@ -57,6 +57,11 @@ export type InternshipApplicationInput = {
   resumeText: string;
   portfolioUrl?: string;
   availability?: string;
+  source?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  referrer?: string;
 };
 
 async function ensureInternshipTable() {
@@ -72,9 +77,19 @@ async function ensureInternshipTable() {
     resume_text TEXT NOT NULL,
     portfolio_url TEXT,
     availability TEXT,
+    source TEXT,
+    utm_source TEXT,
+    utm_medium TEXT,
+    utm_campaign TEXT,
+    referrer TEXT,
     status TEXT NOT NULL DEFAULT 'جدید',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`).run();
+  await db.prepare("ALTER TABLE vibelab_internship_applications ADD COLUMN source TEXT").run().catch(() => null);
+  await db.prepare("ALTER TABLE vibelab_internship_applications ADD COLUMN utm_source TEXT").run().catch(() => null);
+  await db.prepare("ALTER TABLE vibelab_internship_applications ADD COLUMN utm_medium TEXT").run().catch(() => null);
+  await db.prepare("ALTER TABLE vibelab_internship_applications ADD COLUMN utm_campaign TEXT").run().catch(() => null);
+  await db.prepare("ALTER TABLE vibelab_internship_applications ADD COLUMN referrer TEXT").run().catch(() => null);
   return db;
 }
 
@@ -98,9 +113,9 @@ export async function createInternshipApplication(input: InternshipApplicationIn
 
   await db
     .prepare(`INSERT INTO vibelab_internship_applications
-      (full_name, email, phone, track, location_id, resume_text, portfolio_url, availability)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-    .bind(fullName, email, phone, input.track, input.locationId, resumeText.slice(0, 5000), input.portfolioUrl?.trim() || null, input.availability?.trim() || null)
+      (full_name, email, phone, track, location_id, resume_text, portfolio_url, availability, source, utm_source, utm_medium, utm_campaign, referrer)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .bind(fullName, email, phone, input.track, input.locationId, resumeText.slice(0, 5000), input.portfolioUrl?.trim() || null, input.availability?.trim() || null, input.source?.trim() || null, input.utmSource?.trim() || null, input.utmMedium?.trim() || null, input.utmCampaign?.trim() || null, input.referrer?.trim() || null)
     .run();
 
   return { ok: true, location };
