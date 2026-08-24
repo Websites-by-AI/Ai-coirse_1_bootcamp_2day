@@ -125,7 +125,7 @@ const githubAgentSkills = [
 ];
 
 export default function HomeClient() {
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme, setTheme] = useState<Theme>('light');
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeDay, setActiveDay] = useState<DayKey>('one');
   const [shareStatus, setShareStatus] = useState<ShareStatus>('idle');

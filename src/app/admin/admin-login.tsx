@@ -92,7 +92,8 @@ export default function AdminLogin({ googleEnabled }: { googleEnabled: boolean }
         <aside className="admin-login-aside">
           <a href="/" className="admin-brand"><span>V</span><b>VibeLab</b></a>
           <div className="admin-aside-copy"><div className="admin-aside-icon"><PanelIcon name="spark" /></div><p>فضای مدیریتی</p><h1>پروژه‌ها، ثبت‌نام‌ها و ماراتن VibeLab را از یک‌جا <em>هدایت کن.</em></h1><span>دسترسی مدیریت فقط برای تیم آکادمی فعال است.</span></div>
-          <div className="admin-aside-status"><i><PanelIcon name="check" /></i><div><b>دیتابیس متصل و آماده است</b><small>اطلاعات پنل با PostgreSQL همگام می‌شود.</small></div></div>
+          <div className="admin-login-gallery" aria-label="گالری امکانات پنل"><article><b>کاربران</b><small>رزومه، مسیر و وضعیت</small></article><article><b>کارآموزی</b><small>نقاط آموزشی و مربی</small></article><article><b>فراخوان‌ها</b><small>CRM و فرم‌های آماده</small></article><article><b>ربات‌ها</b><small>تلگرام، کانال و بله</small></article></div>
+          <div className="admin-aside-status"><i><PanelIcon name="check" /></i><div><b>دیتابیس متصل و آماده است</b><small>Cloudflare D1 برای ثبت‌نام، کارآموزی و پنل فعال است.</small></div></div>
         </aside>
         <section className="admin-login-card">
           <a href="/" className="admin-mobile-brand"><span>V</span> VibeLab</a>
