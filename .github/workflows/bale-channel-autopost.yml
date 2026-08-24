@@ -1,0 +1,48 @@
+name: Bale Channel Auto Post
+
+on:
+  schedule:
+    # 10:00 Tehran time (UTC+03:30)
+    - cron: "30 6 * * *"
+  workflow_dispatch:
+    inputs:
+      templateIndex:
+        description: "Optional template index (0-2). Leave empty for daily rotation."
+        required: false
+        default: ""
+      dryRun:
+        description: "Preview only, do not publish"
+        required: false
+        default: "true"
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish or preview Bale channel post
+        env:
+          BALE_CHANNEL_POST_URL: ${{ secrets.BALE_CHANNEL_POST_URL }}
+          BALE_CHANNEL_POST_SECRET: ${{ secrets.BALE_CHANNEL_POST_SECRET }}
+          TEMPLATE_INDEX: ${{ github.event.inputs.templateIndex }}
+          DRY_RUN: ${{ github.event.inputs.dryRun }}
+        run: |
+          set -euo pipefail
+          : "${BALE_CHANNEL_POST_URL:?Missing BALE_CHANNEL_POST_URL secret}"
+          : "${BALE_CHANNEL_POST_SECRET:?Missing BALE_CHANNEL_POST_SECRET secret}"
+
+          BODY='{}'
+          if [ -n "${TEMPLATE_INDEX:-}" ]; then
+            BODY="{\"templateIndex\":${TEMPLATE_INDEX}}"
+          fi
+          if [ "${DRY_RUN:-true}" = "true" ]; then
+            if [ "$BODY" = '{}' ]; then
+              BODY='{ "dryRun": true }'
+            else
+              BODY=$(echo "$BODY" | sed 's/}$/,"dryRun":true}/')
+            fi
+          fi
+
+          curl -fsS -X POST "$BALE_CHANNEL_POST_URL" \
+            -H "Content-Type: application/json" \
+            -H "x-vibelab-bale-secret: $BALE_CHANNEL_POST_SECRET" \
+            --data "$BODY"

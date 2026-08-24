@@ -80,8 +80,11 @@ function mainKeyboard() {
         { text: "موسیقی AI", callback_data: "music" },
       ],
       [
-        { text: "ثبت‌نام در سایت", url: `${SITE_URL}/register` },
+        { text: "مدرسه اسنپی", url: `${SITE_URL}/school-snap` },
         { text: "کانال آموزش", url: CHANNEL_URL },
+      ],
+      [
+        { text: "ثبت‌نام در سایت", url: `${SITE_URL}/register` },
       ],
     ],
   };

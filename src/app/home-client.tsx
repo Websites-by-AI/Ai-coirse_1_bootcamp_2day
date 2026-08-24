@@ -169,6 +169,7 @@ export default function HomeClient() {
     { href: '/learning-plan', label: 'مسیر آموزش' },
     { href: '/masir', label: 'MASIR' },
     { href: '/channels', label: 'کانال‌ها' },
+    { href: '/school-snap', label: 'مدرسه اسنپی' },
     { href: '/login', label: 'ورود' },
     { href: '/register', label: 'ثبت‌نام' },
     { href: '/panel', label: 'پنل کاربر' },
