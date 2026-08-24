@@ -1,0 +1,48 @@
+name: Telegram Channel Auto Post
+
+on:
+  schedule:
+    # 09:00 Tehran time (UTC+03:30)
+    - cron: "30 5 * * *"
+  workflow_dispatch:
+    inputs:
+      templateIndex:
+        description: "Optional template index (0-4). Leave empty for daily rotation."
+        required: false
+        default: ""
+      dryRun:
+        description: "Preview only, do not publish"
+        required: false
+        default: "false"
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish or preview Telegram channel post
+        env:
+          CHANNEL_POST_URL: ${{ secrets.CHANNEL_POST_URL }}
+          CHANNEL_POST_SECRET: ${{ secrets.CHANNEL_POST_SECRET }}
+          TEMPLATE_INDEX: ${{ github.event.inputs.templateIndex }}
+          DRY_RUN: ${{ github.event.inputs.dryRun }}
+        run: |
+          set -euo pipefail
+          : "${CHANNEL_POST_URL:?Missing CHANNEL_POST_URL secret}"
+          : "${CHANNEL_POST_SECRET:?Missing CHANNEL_POST_SECRET secret}"
+
+          BODY='{}'
+          if [ -n "${TEMPLATE_INDEX:-}" ]; then
+            BODY="{\"templateIndex\":${TEMPLATE_INDEX}}"
+          fi
+          if [ "${DRY_RUN:-false}" = "true" ]; then
+            if [ "$BODY" = '{}' ]; then
+              BODY='{ "dryRun": true }'
+            else
+              BODY=$(echo "$BODY" | sed 's/}$/,"dryRun":true}/')
+            fi
+          fi
+
+          curl -fsS -X POST "$CHANNEL_POST_URL" \
+            -H "Content-Type: application/json" \
+            -H "x-vibelab-channel-secret: $CHANNEL_POST_SECRET" \
+            --data "$BODY"
