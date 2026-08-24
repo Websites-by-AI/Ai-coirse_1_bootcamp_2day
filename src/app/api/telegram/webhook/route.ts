@@ -70,31 +70,16 @@ async function logTelegramEvent(update: TelegramUpdate, command: string | null) 
 
 function mainKeyboard() {
   return {
-    inline_keyboard: [
-      [
-        { text: "ورودی دیوار/شیپور", callback_data: "classified_start" },
-        { text: "تحلیل رزومه", callback_data: "resume_plan" },
-      ],
-      [
-        { text: "مسیر شغلی", callback_data: "masir" },
-        { text: "سوالات شروع", callback_data: "starter_questions" },
-      ],
-      [
-        { text: "کارآموزی", callback_data: "internship" },
-        { text: "کارتابل کارآموز", url: `${SITE_URL}/internship-desk` },
-      ],
-      [
-        { text: "موسیقی AI", callback_data: "music" },
-      ],
-      [
-        { text: "مدرسه اسنپی", callback_data: "school_snap" },
-        { text: "کانال و پست‌ها", callback_data: "channel" },
-      ],
-      [
-        { text: "ثبت‌نام در سایت", url: `${SITE_URL}/register` },
-        { text: "کانال آموزش", url: CHANNEL_URL },
-      ],
+    keyboard: [
+      ["🧭 مسیر شغلی", "🧾 تحلیل رزومه"],
+      ["🎓 کارآموزی", "🏫 مدرسه اسنپی"],
+      ["📣 کانال و پست‌ها", "🎵 موسیقی AI"],
+      ["🧑‍💻 کارتابل کارآموز", "🌐 لینک‌های سایت"],
     ],
+    resize_keyboard: true,
+    persistent: true,
+    one_time_keyboard: false,
+    input_field_placeholder: "رزومه یا یکی از دکمه‌های پایین را انتخاب کن...",
   };
 }
 
@@ -135,11 +120,14 @@ function replyFor(text: string, message?: TelegramMessage) {
   if (normalized.startsWith("/help")) {
     return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/divar سوالات مخصوص ورودی دیوار/شیپور\n/internship کارآموزی\n/school مدرسه اسنپی دانش‌آموز و مربی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
   }
-  if (normalized.startsWith("/divar") || normalized.startsWith("/sheypoor") || normalized.startsWith("/classified")) return starterQuestions("آگهی دیوار/شیپور");
-  if (normalized.startsWith("/internship")) return callbackReply("internship");
-  if (normalized.startsWith("/school")) return callbackReply("school_snap");
-  if (normalized.startsWith("/learning") || normalized.startsWith("/masir")) return callbackReply("resume_plan");
-  if (normalized.startsWith("/music")) return callbackReply("music");
+  if (normalized.startsWith("/divar") || normalized.startsWith("/sheypoor") || normalized.startsWith("/classified") || text.includes("دیوار") || text.includes("شیپور")) return starterQuestions("آگهی دیوار/شیپور");
+  if (normalized.startsWith("/internship") || text.includes("کارآموزی")) return callbackReply("internship");
+  if (normalized.startsWith("/school") || text.includes("مدرسه اسنپی")) return callbackReply("school_snap");
+  if (normalized.startsWith("/learning") || normalized.startsWith("/masir") || text.includes("تحلیل رزومه") || text.includes("مسیر شغلی")) return callbackReply("resume_plan");
+  if (normalized.startsWith("/music") || text.includes("موسیقی")) return callbackReply("music");
+  if (text.includes("کانال") || text.includes("پست")) return callbackReply("channel");
+  if (text.includes("کارتابل")) return `کارتابل کارآموزی:\n${SITE_URL}/internship-desk\n\nدر این صفحه تسک‌های هفتگی، ویدیوهای آموزشی، پروژه فروشگاهی، گروه ۴ نفره و فضای کار اشتراکی را می‌بینی.`;
+  if (text.includes("لینک")) return `لینک‌های مهم VibeLab:\nسایت: ${SITE_URL}\nثبت‌نام: ${SITE_URL}/register\nکارتابل: ${SITE_URL}/internship-desk\nمدرسه اسنپی: ${SITE_URL}/school-snap\nکانال: ${CHANNEL_URL}`;
   if (normalized.startsWith("/health")) return "وضعیت فعلی: سایت روی Cloudflare D1 فعال است ✅";
 
   if (text.trim().length >= 60) {
