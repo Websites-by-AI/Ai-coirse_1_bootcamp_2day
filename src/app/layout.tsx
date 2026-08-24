@@ -5,7 +5,6 @@ import "./admin/admin.css";
 import "./register/register.css";
 import "./panel/project-panel.css";
 import "./profile/profile.css";
-import ConfigWarningModal from "@/components/config-warning-modal";
 import StructuredData from "@/components/structured-data";
 
 export const viewport: Viewport = {
@@ -84,7 +83,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body>
         {children}
-        <ConfigWarningModal />
         <StructuredData />
       </body>
     </html>
