@@ -83,14 +83,16 @@ export default function ChannelsPage() {
 
       <section id="bale-setup" className="channels-container bale-setup">
         <p>BALE SETUP</p>
-        <h2>برای اتصال بله چه چیزی لازم است؟</h2>
+        <h2>طراحی ربات بله و اتصال پست خودکار</h2>
         <ul>
-          <li>توکن ربات بله از BotFather/بات‌ساز بله</li>
-          <li>لینک یا شناسه کانال بله</li>
-          <li>متن خوشامدگویی و دستورها، مشابه تلگرام</li>
+          <li>منوی ربات: مسیر شغلی، تحلیل رزومه، کارآموزی، مدرسه اسنپی، موسیقی AI، کانال آموزش</li>
+          <li>دستورها: <code>/start</code>، <code>/menu</code>، <code>/learning</code>، <code>/internship</code>، <code>/school</code>، <code>/masir</code></li>
+          <li>توکن ربات بله باید به صورت Secret ذخیره شود: <code>BALE_BOT_TOKEN</code></li>
+          <li>شناسه کانال بله باید به صورت Secret ذخیره شود: <code>BALE_CHANNEL_ID</code></li>
           <li>Webhook URL پیشنهادی: <code>https://v2.vibelab.ir/api/bale/webhook</code></li>
+          <li>Auto-post endpoint: <code>https://v2.vibelab.ir/api/bale/channel-post</code></li>
         </ul>
-        <p className="bale-note">توکن بله را داخل چت عمومی نفرستید؛ باید به شکل Secret روی Cloudflare ذخیره شود.</p>
+        <p className="bale-note">توکن بله را داخل چت عمومی نفرستید؛ باید به شکل Secret روی Cloudflare ذخیره شود. راهنمای کامل در GitHub: <a href="https://github.com/Websites-by-AI/Ai-coirse_1_bootcamp_2day/blob/main/docs/BALE_BOT_SETUP_FA.md" target="_blank" rel="noreferrer">BALE_BOT_SETUP_FA.md</a></p>
       </section>
     </main>
   );
