@@ -177,6 +177,7 @@ export default function HomeClient() {
     { href: '#agent-skills', label: 'Agent Skills' },
     { href: '/education', label: 'مرکز آموزش' },
     { href: '/internship', label: 'کارآموزی' },
+    { href: '/internship-desk', label: 'کارتابل کارآموز' },
     { href: '/learning-plan', label: 'مسیر آموزش' },
     { href: '/masir', label: 'MASIR' },
     { href: '/channels', label: 'کانال‌ها' },

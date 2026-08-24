@@ -81,6 +81,9 @@ function mainKeyboard() {
       ],
       [
         { text: "کارآموزی", callback_data: "internship" },
+        { text: "کارتابل کارآموز", url: `${SITE_URL}/internship-desk` },
+      ],
+      [
         { text: "موسیقی AI", callback_data: "music" },
       ],
       [
