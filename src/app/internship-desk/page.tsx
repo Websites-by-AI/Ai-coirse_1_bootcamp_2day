@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { internshipDeskTasks, internshipDeskVideos, internshipProject, internshipWorkspace } from "@/lib/internship-desk";
+import { clientProjectIdeas, internshipDeskTasks, internshipDeskVideos, internshipProject, internshipWorkspace } from "@/lib/internship-desk";
 
 export const metadata: Metadata = {
   title: "کارتابل کارآموزی | Websites by AI و VibeLab",
@@ -43,6 +43,7 @@ export default function InternshipDeskPage() {
           <small>{internshipProject.label}</small>
           <h2>{internshipProject.title}</h2>
           <span>{internshipProject.description}</span>
+          <ul className="desk-deliverables">{internshipProject.deliverables.map((item) => <li key={item}>{item}</li>)}</ul>
           <div>
             <a href={internshipProject.demoUrl} target="_blank" rel="noreferrer">مشاهده دمو ↗</a>
             <a href="https://t.me/ai_vibelab_bot" target="_blank" rel="noreferrer">ثبت پیشرفت در ربات</a>
@@ -65,9 +66,25 @@ export default function InternshipDeskPage() {
           <p>🎬 ویدیوهای آموزشی لازم برای این هفته</p>
           <h2>قبل از انجام تسک‌ها این ویدیوها را ببین</h2>
         </div>
-        <div className="desk-video-grid">
-          {internshipDeskVideos.map((video) => <a key={video.title} href={video.url} target="_blank" rel="noreferrer"><small>{video.source} · {video.duration}</small><h3>{video.title}</h3><p>{video.task}</p></a>)}
+        <div className="desk-video-grid visual">
+          {internshipDeskVideos.map((video) => <a key={video.title} href={video.url} target="_blank" rel="noreferrer"><div className="desk-video-thumb" style={{ background: `linear-gradient(135deg, ${video.accent}, #10193e)` }}><span>{video.mock}</span><i>▶</i></div><small>{video.source} · {video.duration}</small><h3>{video.title}</h3><p>{video.task}</p><em>{video.lesson}</em></a>)}
         </div>
+      </section>
+
+      <section className="desk-container desk-section">
+        <div className="desk-section-head">
+          <p>💼 پروژه‌های پیشنهادی برای مشتری بر اساس رزومه</p>
+          <h2>۱۰ پروژه قابل فروش برای شروع کارآموز</h2>
+        </div>
+        <div className="desk-client-project-grid">
+          {clientProjectIdeas.map((project) => <article key={project.title}><small>{project.buyer}</small><h3>{project.title}</h3><p>{project.stack}</p><b>{project.price}</b></article>)}
+        </div>
+      </section>
+
+      <section className="desk-container desk-section desk-demo-login">
+        <div className="desk-section-head"><p>👤 دمو برای کاربران واردشده</p><h2>می‌خواهی ببینی کارتابل بعد از ورود چطور کار می‌کند؟</h2></div>
+        <p>با حساب دمو وارد شو، پنل کاربر، رزومه، پروژه‌ها و مسیر کاریابی را ببین و بعد پیشرفتت را در ربات ثبت کن.</p>
+        <div><a href="/login">ورود با حساب دمو</a><a href="/panel">دیدن پنل کاربر</a><a href="https://t.me/ai_vibelab_bot" target="_blank" rel="noreferrer">ثبت پیشرفت در ربات</a></div>
       </section>
 
       <section className="desk-container desk-section desk-workspace">
