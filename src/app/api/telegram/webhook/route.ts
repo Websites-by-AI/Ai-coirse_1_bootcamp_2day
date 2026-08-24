@@ -108,9 +108,9 @@ function callbackReply(data?: string) {
 
 function replyFor(text: string, message?: TelegramMessage) {
   const normalized = text.trim().toLowerCase();
-  if (normalized.startsWith("/start")) return compactIntro();
+  if (normalized.startsWith("/start") || normalized.startsWith("/menu")) return compactIntro();
   if (normalized.startsWith("/help")) {
-    return "دستورها:\n/start شروع\n/internship کارآموزی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
+    return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/internship کارآموزی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
   }
   if (normalized.startsWith("/internship")) return "برای کارآموزی طراحی سایت یا تولید محتوا، اول رزومه کوتاهت رو همینجا بفرست. ثبت رسمی هم در سایت انجام می‌شود: https://v2.vibelab.ir/internship";
   if (normalized.startsWith("/learning") || normalized.startsWith("/masir")) return callbackReply("resume_plan");
