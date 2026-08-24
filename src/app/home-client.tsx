@@ -166,6 +166,7 @@ export default function HomeClient() {
     { href: '#agent-skills', label: 'Agent Skills' },
     { href: '/education', label: 'مرکز آموزش' },
     { href: '/internship', label: 'کارآموزی' },
+    { href: '/learning-plan', label: 'مسیر آموزش' },
     { href: '/login', label: 'ورود' },
     { href: '/register', label: 'ثبت‌نام' },
     { href: '/panel', label: 'پنل کاربر' },
