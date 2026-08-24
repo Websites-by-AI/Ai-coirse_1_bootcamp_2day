@@ -25,6 +25,7 @@ type TelegramUpdate = {
 };
 
 const BOT_URL = "https://t.me/ai_vibelab_bot";
+const CHANNEL_URL = "https://t.me/vibelab_channel";
 const SITE_URL = "https://v2.vibelab.ir";
 
 function token() {
@@ -80,13 +81,14 @@ function mainKeyboard() {
       ],
       [
         { text: "ثبت‌نام در سایت", url: `${SITE_URL}/register` },
+        { text: "کانال آموزش", url: CHANNEL_URL },
       ],
     ],
   };
 }
 
 function compactIntro() {
-  return "سلام 👋\nمن ربات VibeLab هستم. اینجا داخل خود تلگرام می‌تونم مسیر شغلی، کارآموزی، تحلیل رزومه و برنامه یادگیری رو خلاصه کنم.\n\nبرای شروع یکی از گزینه‌ها رو بزن؛ لینک‌ها فقط وقتی لازم باشه نمایش داده می‌شن.";
+  return "سلام 👋\nمن ربات VibeLab هستم. اینجا داخل خود تلگرام می‌تونم مسیر شغلی، کارآموزی، تحلیل رزومه و برنامه یادگیری رو خلاصه کنم.\n\nکانال آموزش‌ها: https://t.me/vibelab_channel\n\nبرای شروع یکی از گزینه‌ها رو بزن؛ لینک‌ها فقط وقتی لازم باشه نمایش داده می‌شن.";
 }
 
 function callbackReply(data?: string) {
