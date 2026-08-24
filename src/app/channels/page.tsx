@@ -33,6 +33,19 @@ const channels = [
   },
 ];
 
+const telegramSkills = [
+  "منوی داخلی کوتاه و قابل فهم",
+  "Callback Query برای دکمه‌های بدون لینک",
+  "تحلیل رزومه داخل خود چت",
+  "پیشنهاد نقطه آموزشی و مربی",
+  "ارسال پست خودکار به کانال",
+  "Dry-run قبل از انتشار واقعی",
+  "ثبت eventها در Cloudflare D1",
+  "Webhook امن با Secret Token",
+  "قالب‌های محتوایی قابل چرخش",
+  "اتصال آینده به بله و کانال‌های دیگر",
+];
+
 export default function ChannelsPage() {
   return (
     <main dir="rtl" className="channels-page">
@@ -60,6 +73,12 @@ export default function ChannelsPage() {
             {item.url.startsWith("http") ? <a href={item.url} target="_blank" rel="noreferrer">باز کردن</a> : <a href={item.url}>جزئیات اتصال</a>}
           </article>
         ))}
+      </section>
+
+      <section className="channels-container telegram-skills-section">
+        <p>TELEGRAM BOT SKILLS</p>
+        <h2>مهارت‌هایی که برای ربات و کانال VibeLab فعال شده‌اند</h2>
+        <div>{telegramSkills.map((skill, index) => <span key={skill}>{String(index + 1).padStart(2, "0")} · {skill}</span>)}</div>
       </section>
 
       <section id="bale-setup" className="channels-container bale-setup">

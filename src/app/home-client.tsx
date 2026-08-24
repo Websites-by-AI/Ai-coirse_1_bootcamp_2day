@@ -5,7 +5,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 type Theme = 'dark' | 'light' | 'aurora' | 'rose';
 type DayKey = 'one' | 'two';
 type ShareStatus = 'idle' | 'copied' | 'shared' | 'temporary';
-type IconName = 'arrow' | 'bolt' | 'brain' | 'calendar' | 'check' | 'chevron' | 'circle' | 'clapper' | 'code' | 'copy' | 'cursor' | 'globe' | 'image' | 'layers' | 'link' | 'mail' | 'menu' | 'moon' | 'play' | 'rocket' | 'share' | 'spark' | 'sun' | 'target' | 'tool' | 'upload' | 'users' | 'wand' | 'x';
+type IconName = 'arrow' | 'bolt' | 'brain' | 'calendar' | 'check' | 'chevron' | 'circle' | 'clapper' | 'code' | 'copy' | 'cursor' | 'globe' | 'image' | 'layers' | 'link' | 'mail' | 'menu' | 'moon' | 'play' | 'rocket' | 'search' | 'share' | 'spark' | 'sun' | 'target' | 'tool' | 'upload' | 'users' | 'wand' | 'x';
 
 const icons: Record<IconName, ReactNode> = {
   arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
@@ -28,6 +28,7 @@ const icons: Record<IconName, ReactNode> = {
   moon: <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z" />,
   play: <path d="m9 7 7 5-7 5V7Z" />,
   rocket: <><path d="M14 4c2.3-2.3 5.3-2 6-2-.1.7.3 3.7-2 6l-7 7-5-5 8-6Z" /><path d="M9 12 5 12l-2 3 5 1M12 15v4l-3 2-1-5" /><circle cx="15" cy="7" r="1" /></>,
+  search: <><circle cx="11" cy="11" r="6" /><path d="m20 20-4.2-4.2" /></>,
   share: <><circle cx="18" cy="5" r="2" /><circle cx="6" cy="12" r="2" /><circle cx="18" cy="19" r="2" /><path d="m8 11 8-5m-8 7 8 5" /></>,
   spark: <path d="m12 2 1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2Zm7 14 .7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3Z" />,
   sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
@@ -111,6 +112,16 @@ const githubAgentSkills = [
   { title: 'Security Pass', detail: 'بررسی session، cookie، secretها، rate limit، Turnstile و مسیرهای حساس.', icon: 'target' as IconName },
   { title: 'Docs & Playbooks', detail: 'ساخت README، deploy guide، startup call CRM و متن‌های آماده فرم‌ها.', icon: 'copy' as IconName },
   { title: 'Product UX Sprint', detail: 'بهبود dashboard، sidebar، onboarding، رزومه، job finder و landing برای conversion.', icon: 'rocket' as IconName },
+  { title: 'Telegram Bot Menu Design', detail: 'طراحی منوی inline کوتاه، callbackها و flow داخل خود تلگرام بدون لینک‌دهی زیاد.', icon: 'menu' as IconName },
+  { title: 'Telegram Webhook Security', detail: 'استفاده از secret token، لاگ D1 و جلوگیری از request غیرمجاز به webhook.', icon: 'target' as IconName },
+  { title: 'Callback Query Flow', detail: 'ساخت مسیرهای دکمه‌ای برای رزومه، کارآموزی، مدرسه اسنپی و موسیقی AI.', icon: 'cursor' as IconName },
+  { title: 'Resume-to-Plan Bot', detail: 'تحلیل متن رزومه داخل چت و پیشنهاد مسیر، ویدیو، نقطه آموزشی و مربی.', icon: 'brain' as IconName },
+  { title: 'Channel Auto Posting', detail: 'تولید و ارسال پست خودکار آموزشی به کانال تلگرام با GitHub Actions یا Cron.', icon: 'calendar' as IconName },
+  { title: 'Post Template System', detail: 'ساخت قالب‌های پیام برای کارآموزی، مسیر، مدرسه اسنپی و منابع آموزشی.', icon: 'copy' as IconName },
+  { title: 'Telegram Analytics', detail: 'ذخیره commandها، callbackها و رفتار کاربران در D1 برای تحلیل رشد کانال.', icon: 'users' as IconName },
+  { title: 'Bale Bot Adapter', detail: 'آماده‌سازی webhook و auto-post برای پیام‌رسان بله با secret و channel id.', icon: 'mail' as IconName },
+  { title: 'Broadcast Safety', detail: 'dry-run، secret جداگانه و لاگ خطا قبل از انتشار پست واقعی در کانال.', icon: 'check' as IconName },
+  { title: 'Multi-channel Learning CRM', detail: 'اتصال سایت، تلگرام، بله، کانال‌ها و پنل ادمین برای پیگیری آموزش و کارآموزی.', icon: 'share' as IconName },
 ];
 
 export default function HomeClient() {
@@ -255,7 +266,7 @@ export default function HomeClient() {
 
       <section id="market" className="market-section"><div className="vibe-container"><div className="section-intro centered"><div className="vibe-eyebrow"><Icon name="target" size={15} /> مسیر بازار و کار</div><h2>این مهارت‌ها برای چه کاری <span>در ایران و بازار جهانی</span> کاربرد دارد؟</h2><p>VibeLab فقط آموزش ابزار نیست؛ خروجی پنل کاربر باید به رزومه، نمونه‌کار و مسیر پیدا کردن پروژه وصل شود.</p></div><div className="market-grid">{marketPaths.map((item) => <article key={item.title} className="market-card"><span><Icon name={item.icon} size={22} /></span><small>{item.market}</small><h3>{item.title}</h3><p>{item.description}</p><em>{item.income}</em></article>)}</div><div className="market-cta"><div><b>در پنل کاربر، برای همین مسیرها رزومه، پروژه، پیام معرفی و readiness score ساخته می‌شود.</b><p>اگر کاربر مشتاق تولید وب‌سایت یا تولید محتوا باشد، مسیر شغلی پیشنهادی و تمرین‌های YouTube/Job Finder را می‌بیند.</p></div><a href="/panel" className="vibe-primary"><Icon name="rocket" size={16} /> مشاهده پنل کاربر</a></div></div></section>
 
-      <section id="agent-skills" className="agent-skills-section"><div className="vibe-container"><div className="agent-skills-head"><div><div className="vibe-eyebrow"><Icon name="code" size={15} /> GitHub + Claude/Agent Skills</div><h2>یک لایه‌ی اجرایی برای بهتر کردن محصول، نه فقط تولید متن.</h2><p>این مهارت‌ها برای مدیریت repo، رفع خطا، deploy، اتصال API و آماده‌سازی VibeLab به عنوان استارتاپ استفاده می‌شوند.</p></div><a href="https://github.com/Websites-by-AI/Ai-coirse_1_bootcamp_2day" target="_blank" rel="noreferrer" className="vibe-secondary"><Icon name="code" size={16} /> مشاهده GitHub</a></div><div className="agent-skill-grid">{githubAgentSkills.map((skill, index) => <article key={skill.title} className="agent-skill-card"><span><Icon name={skill.icon} size={20} /></span><small>{String(index + 1).padStart(2, '0')}</small><h3>{skill.title}</h3><p>{skill.detail}</p></article>)}</div></div></section>
+      <section id="agent-skills" className="agent-skills-section"><div className="vibe-container"><div className="agent-skills-head"><div><div className="vibe-eyebrow"><Icon name="code" size={15} /> GitHub + Claude/Agent Skills</div><h2>۲۰ مهارت اجرایی برای بهتر کردن محصول، ربات و کانال‌ها.</h2><p>این مهارت‌ها برای مدیریت repo، رفع خطا، deploy، اتصال API، طراحی ربات تلگرام/بله، پست خودکار کانال و آماده‌سازی VibeLab به عنوان استارتاپ استفاده می‌شوند.</p></div><a href="https://github.com/Websites-by-AI/Ai-coirse_1_bootcamp_2day" target="_blank" rel="noreferrer" className="vibe-secondary"><Icon name="code" size={16} /> مشاهده GitHub</a></div><div className="agent-skill-grid">{githubAgentSkills.map((skill, index) => <article key={skill.title} className="agent-skill-card"><span><Icon name={skill.icon} size={20} /></span><small>{String(index + 1).padStart(2, '0')}</small><h3>{skill.title}</h3><p>{skill.detail}</p></article>)}</div></div></section>
 
       <section id="startup-calls" className="startup-calls-section"><div className="vibe-container"><div className="startup-calls-layout"><div><div className="vibe-eyebrow coral"><Icon name="rocket" size={15} /> مسیر استارتاپ و فراخوان‌ها</div><h2>VibeLab برای اپلای، ثبت شرکت و همکاری بین‌المللی آماده می‌شود.</h2><p>در پنل ادمین، ۱۰ فراخوان و مسیر مرتبط با امارات، کانادا و برنامه‌های جهانی ثبت شده؛ متن فرم‌ها آماده کپی است و زمان پیگیری هر مورد مشخص شده است.</p><a href="/admin" className="vibe-primary"><Icon name="arrow" size={16} /> ورود ادمین و دیدن فراخوان‌ها</a></div><div className="startup-calls-list">{startupCallsTeaser.map((item) => <article key={item.name}><span>{item.status}</span><b>{item.name}</b><p>{item.note}</p></article>)}</div></div></div></section>
 

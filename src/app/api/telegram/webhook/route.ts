@@ -80,11 +80,12 @@ function mainKeyboard() {
         { text: "موسیقی AI", callback_data: "music" },
       ],
       [
-        { text: "مدرسه اسنپی", url: `${SITE_URL}/school-snap` },
-        { text: "کانال آموزش", url: CHANNEL_URL },
+        { text: "مدرسه اسنپی", callback_data: "school_snap" },
+        { text: "کانال و پست‌ها", callback_data: "channel" },
       ],
       [
         { text: "ثبت‌نام در سایت", url: `${SITE_URL}/register` },
+        { text: "کانال آموزش", url: CHANNEL_URL },
       ],
     ],
   };
@@ -102,6 +103,10 @@ function callbackReply(data?: string) {
       return "رزومه یا معرفی کوتاهت رو همینجا بفرست.\nمثلاً بنویس: مهارت‌ها، تجربه، علاقه به طراحی سایت یا تولید محتوا، شهر/محله و هدفت برای کار.";
     case "internship":
       return "مدل اسنپی کارآموزی VibeLab:\n\n۱) رزومه/معرفی کوتاه می‌فرستی.\n۲) AI مسیرت را مشخص می‌کند: طراحی سایت، تولید محتوا، رزومه، کاریابی یا Vibe Coding.\n۳) نزدیک‌ترین نقطه آموزشی مثل اسنپ پیشنهاد می‌شود.\n۴) اگر در یک نقطه حداقل ۴ نفر تکمیل شوند، جلسه حضوری هماهنگ می‌شود؛ اگر کمتر باشد آنلاین/هیبرید است.\n\nنقاط فعلی: نارمک هفت‌حوض، تهرانپارس، ونک/میرداماد، انقلاب، سعادت‌آباد/پونک، کرج.\n\n۳۰ دقیقه اول رایگان است. بعد هزینه فضای کار اشتراکی/صندلی/اتاق جلسه با کارآموز یا گروه است.\n\nبرای شروع، همینجا رزومه کوتاهت را بفرست یا /learning را بزن.";
+    case "school_snap":
+      return "مدرسه اسنپی VibeLab:\n\nبرای دانش‌آموز، مربی و مدرسه طراحی شده است. دانش‌آموز هدف و سطح را می‌دهد، AI مسیر را پیشنهاد می‌دهد، نزدیک‌ترین مدرسه/فضای آموزشی انتخاب می‌شود و هزینه مربی + اجاره فضا شفاف می‌شود.\n\nنقاط نمونه: نارمک، تهرانپارس، انقلاب، ونک، صادقیه، تجریش، شهرک غرب، کرج.\n\nلینک کامل: https://v2.vibelab.ir/school-snap";
+    case "channel":
+      return "کانال VibeLab News برای پست‌های خودکار آموزش و کارآموزی فعال است:\nhttps://t.me/vibelab_channel\n\nقالب‌های پست خودکار: مسیر امروز، کارآموزی سایت، کارآموزی محتوا، MASIR و معرفی ربات. انتشار خودکار با GitHub Actions و endpoint امن انجام می‌شود.";
     case "music":
       return "ماژول AI Music در حال آماده‌سازی است. گزینه‌های امن‌تر: ACE-Step/HuggingFace، fal.ai، WaveSpeed و MiniMax. هدف: تست آهنگ فارسی با شعر کاربر.";
     default:
@@ -113,9 +118,10 @@ function replyFor(text: string, message?: TelegramMessage) {
   const normalized = text.trim().toLowerCase();
   if (normalized.startsWith("/start") || normalized.startsWith("/menu")) return compactIntro();
   if (normalized.startsWith("/help")) {
-    return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/internship کارآموزی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
+    return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/internship کارآموزی\n/school مدرسه اسنپی دانش‌آموز و مربی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
   }
   if (normalized.startsWith("/internship")) return callbackReply("internship");
+  if (normalized.startsWith("/school")) return callbackReply("school_snap");
   if (normalized.startsWith("/learning") || normalized.startsWith("/masir")) return callbackReply("resume_plan");
   if (normalized.startsWith("/music")) return callbackReply("music");
   if (normalized.startsWith("/health")) return "وضعیت فعلی: سایت روی Cloudflare D1 فعال است ✅";
