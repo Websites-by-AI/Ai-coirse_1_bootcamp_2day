@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { internshipLocations } from "@/lib/internship";
+import { snapPricingRules, snapTrainingSteps, snapTrainingZones } from "@/lib/snap-training";
 import InternshipApplication from "./internship-application";
 
 export const metadata: Metadata = {
@@ -77,11 +78,26 @@ export default function InternshipPage() {
         </div>
       </section>
 
+      <section className="internship-container internship-section snap-model-section">
+        <div className="internship-section-head">
+          <p>SNAPP-STYLE TRAINING MODEL</p>
+          <h2>مدل اسنپی آموزش: رزومه بده، نقطه و مربی بگیر</h2>
+          <span>در این مدل، کارآموز مثل انتخاب سفر در اسنپ، نزدیک‌ترین نقطه آموزشی و مربی مناسب را بر اساس رزومه، هدف و محله دریافت می‌کند.</span>
+        </div>
+        <div className="snap-model-grid">
+          {snapTrainingSteps.map((step) => <article key={step.title}><b>{step.title}</b><p>{step.text}</p></article>)}
+        </div>
+        <div className="snap-rules-grid">
+          <article><h3>قواعد هزینه و اجرا</h3>{snapPricingRules.map((item) => <span key={item}>{item}</span>)}</article>
+          <article><h3>زون‌های فعال پیشنهادی</h3>{snapTrainingZones.map((item) => <span key={item}>{item}</span>)}</article>
+        </div>
+      </section>
+
       <section className="internship-container internship-section">
         <div className="internship-section-head">
           <p>SNAPP-STYLE HUBS</p>
           <h2>۵ نقطه آموزشی پیشنهادی در تهران و کرج</h2>
-          <span>مدل ما شبیه شبکه نقطه‌ای است: کارآموز نزدیک‌ترین نقطه را انتخاب می‌کند. ۳۰ دقیقه اول برای آشنایی رایگان است؛ بعد از آن هزینه فضای کار اشتراکی یا کافه‌کاری با خود کارآموز است.</span>
+          <span>کارآموز نزدیک‌ترین نقطه را انتخاب می‌کند. ۳۰ دقیقه اول برای آشنایی رایگان است؛ بعد از آن هزینه فضای کار اشتراکی یا کافه‌کاری با خود کارآموز است.</span>
         </div>
         <div className="internship-location-grid">
           {internshipLocations.map((item) => <article key={item.id}><small>{item.city} · {item.area}</small><h3>{item.title}</h3><p>{item.bestFor}</p><b>{item.price}</b><em>{item.access}</em></article>)}

@@ -98,7 +98,7 @@ function callbackReply(data?: string) {
     case "resume_plan":
       return "رزومه یا معرفی کوتاهت رو همینجا بفرست.\nمثلاً بنویس: مهارت‌ها، تجربه، علاقه به طراحی سایت یا تولید محتوا، شهر/محله و هدفت برای کار.";
     case "internship":
-      return "کارآموزی VibeLab دو مسیر دارد:\n• طراحی سایت با AI\n• تولید محتوا با AI\n\nنقاط آموزشی: نارمک هفت‌حوض، ونک/میرداماد، انقلاب، سعادت‌آباد/پونک، کرج.\n۳۰ دقیقه اول رایگان است؛ بعد هزینه فضای کار اشتراکی با کارآموز است.\n\nبرای ثبت رسمی: /internship";
+      return "مدل اسنپی کارآموزی VibeLab:\n\n۱) رزومه/معرفی کوتاه می‌فرستی.\n۲) AI مسیرت را مشخص می‌کند: طراحی سایت، تولید محتوا، رزومه، کاریابی یا Vibe Coding.\n۳) نزدیک‌ترین نقطه آموزشی مثل اسنپ پیشنهاد می‌شود.\n۴) اگر در یک نقطه حداقل ۴ نفر تکمیل شوند، جلسه حضوری هماهنگ می‌شود؛ اگر کمتر باشد آنلاین/هیبرید است.\n\nنقاط فعلی: نارمک هفت‌حوض، تهرانپارس، ونک/میرداماد، انقلاب، سعادت‌آباد/پونک، کرج.\n\n۳۰ دقیقه اول رایگان است. بعد هزینه فضای کار اشتراکی/صندلی/اتاق جلسه با کارآموز یا گروه است.\n\nبرای شروع، همینجا رزومه کوتاهت را بفرست یا /learning را بزن.";
     case "music":
       return "ماژول AI Music در حال آماده‌سازی است. گزینه‌های امن‌تر: ACE-Step/HuggingFace، fal.ai، WaveSpeed و MiniMax. هدف: تست آهنگ فارسی با شعر کاربر.";
     default:
@@ -112,7 +112,7 @@ function replyFor(text: string, message?: TelegramMessage) {
   if (normalized.startsWith("/help")) {
     return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/internship کارآموزی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
   }
-  if (normalized.startsWith("/internship")) return "برای کارآموزی طراحی سایت یا تولید محتوا، اول رزومه کوتاهت رو همینجا بفرست. ثبت رسمی هم در سایت انجام می‌شود: https://v2.vibelab.ir/internship";
+  if (normalized.startsWith("/internship")) return callbackReply("internship");
   if (normalized.startsWith("/learning") || normalized.startsWith("/masir")) return callbackReply("resume_plan");
   if (normalized.startsWith("/music")) return callbackReply("music");
   if (normalized.startsWith("/health")) return "وضعیت فعلی: سایت روی Cloudflare D1 فعال است ✅";
