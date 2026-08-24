@@ -30,6 +30,17 @@ const attendanceRules = [
   "ورودی دیوار و شیپور در پنل ادمین با source جدا ذخیره می‌شود تا پیگیری راحت باشد.",
 ];
 
+const starterQuestions = [
+  "نام، سن و شهر/محله شما چیست؟",
+  "الان دانش‌آموز، دانشجو، کارجو، فریلنسر یا شاغل هستید؟",
+  "هدف اصلی شما چیست: طراحی سایت، تولید محتوا، کنکور/درس، کاریابی یا درآمد پروژه‌ای؟",
+  "چه مهارت‌هایی دارید و با چه ابزارهایی کار کرده‌اید؟",
+  "آیا نمونه‌کار، پیج، رزومه آنلاین یا لینک پروژه دارید؟",
+  "هفته‌ای چند ساعت زمان آزاد دارید؟",
+  "آموزش حضوری می‌خواهید یا آنلاین؟ اگر حضوری، کدام منطقه؟",
+  "آیا می‌خواهید در گروه ۴ نفره محلی شرکت کنید؟",
+];
+
 export default function ApplyPage() {
   return (
     <main dir="rtl" className="internship-page apply-page">
@@ -63,6 +74,16 @@ export default function ApplyPage() {
               <div>{path.items.map((item) => <em key={item}>{item}</em>)}</div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="internship-container apply-rules-section">
+        <div className="internship-section-head">
+          <p>STARTER QUESTIONS</p>
+          <h2>برای اینکه مسیر دقیق‌تر شود، این سوال‌ها را در رزومه جواب بده</h2>
+        </div>
+        <div className="apply-question-grid">
+          {starterQuestions.map((question, index) => <article key={question}><b>{(index + 1).toLocaleString("fa-IR")}</b><span>{question}</span></article>)}
         </div>
       </section>
 

@@ -72,8 +72,12 @@ function mainKeyboard() {
   return {
     inline_keyboard: [
       [
-        { text: "مسیر شغلی", callback_data: "masir" },
+        { text: "ورودی دیوار/شیپور", callback_data: "classified_start" },
         { text: "تحلیل رزومه", callback_data: "resume_plan" },
+      ],
+      [
+        { text: "مسیر شغلی", callback_data: "masir" },
+        { text: "سوالات شروع", callback_data: "starter_questions" },
       ],
       [
         { text: "کارآموزی", callback_data: "internship" },
@@ -95,8 +99,16 @@ function compactIntro() {
   return "سلام 👋\nمن ربات VibeLab هستم. اینجا داخل خود تلگرام می‌تونم مسیر شغلی، کارآموزی، تحلیل رزومه و برنامه یادگیری رو خلاصه کنم.\n\nکانال آموزش‌ها: https://t.me/vibelab_channel\n\nبرای شروع یکی از گزینه‌ها رو بزن؛ لینک‌ها فقط وقتی لازم باشه نمایش داده می‌شن.";
 }
 
+function starterQuestions(source = "آگهی") {
+  return `برای شروع منظم از ${source}، لطفاً همین یک پیام را با جواب کوتاه پر کن:\n\n۱) نام و سن:\n۲) شهر/محله: مثلا نارمک، تهرانپارس، کرج\n۳) وضعیت فعلی: دانش‌آموز، دانشجو، کارجو، فریلنسر؟\n۴) هدف اصلی: طراحی سایت، تولید محتوا، کنکور/درس، کاریابی، یا هر دو؟\n۵) مهارت‌هایی که بلدی:\n۶) نمونه‌کار/پیج/لینک اگر داری:\n۷) زمان آزاد در هفته:\n۸) ترجیح جلسه: حضوری، آنلاین یا ترکیبی؟\n۹) اگر حضوری: حاضر هستی هزینه فضای کار اشتراکی/کلاس را سهمی پرداخت کنی؟\n۱۰) می‌خواهی در تیم ۴ نفره محلی شرکت کنی؟\n\nبعد از ارسال، من مسیر آموزشی + مسیر بازاریابی + نقطه نزدیک + مربی پیشنهادی را داخل همین چت می‌دهم.`;
+}
+
 function callbackReply(data?: string) {
   switch (data) {
+    case "classified_start":
+      return starterQuestions("آگهی دیوار/شیپور");
+    case "starter_questions":
+      return starterQuestions("شروع VibeLab");
     case "masir":
       return "MASIR یعنی از رزومه تا اولین پروژه:\n۱) تحلیل رزومه\n۲) دوره هدفمند\n۳) معلم محلی مثل اسنپ\n۴) مدرک بین‌المللی\n۵) بازار کار ایران و جهان\n\nاگر می‌خوای مسیرت رو بسازم، یک رزومه/معرفی کوتاه همینجا بفرست.";
     case "resume_plan":
@@ -118,8 +130,9 @@ function replyFor(text: string, message?: TelegramMessage) {
   const normalized = text.trim().toLowerCase();
   if (normalized.startsWith("/start") || normalized.startsWith("/menu")) return compactIntro();
   if (normalized.startsWith("/help")) {
-    return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/internship کارآموزی\n/school مدرسه اسنپی دانش‌آموز و مربی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
+    return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/divar سوالات مخصوص ورودی دیوار/شیپور\n/internship کارآموزی\n/school مدرسه اسنپی دانش‌آموز و مربی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
   }
+  if (normalized.startsWith("/divar") || normalized.startsWith("/sheypoor") || normalized.startsWith("/classified")) return starterQuestions("آگهی دیوار/شیپور");
   if (normalized.startsWith("/internship")) return callbackReply("internship");
   if (normalized.startsWith("/school")) return callbackReply("school_snap");
   if (normalized.startsWith("/learning") || normalized.startsWith("/masir")) return callbackReply("resume_plan");
@@ -127,6 +140,10 @@ function replyFor(text: string, message?: TelegramMessage) {
   if (normalized.startsWith("/health")) return "وضعیت فعلی: سایت روی Cloudflare D1 فعال است ✅";
 
   if (text.trim().length >= 60) {
+    const wantsTeam = /۴|4|تیم|گروه|حضوری|محلی/.test(text);
+    const marketingPath = /پروژه|درآمد|فریلنس|کار|مشتری|بازار|دیوار|شیپور/.test(text)
+      ? "مسیر بازاریابی: پیام معرفی + لیست مشتری محلی + پیشنهاد قیمت + برنامه ۷ روزه جذب پروژه."
+      : "مسیر بازاریابی: بعد از ساخت نمونه‌کار، پیام معرفی و برنامه جذب پروژه آماده می‌شود.";
     const plan = generateLearningPlan({
       fullName: message?.from?.first_name || message?.chat?.first_name || "کاربر تلگرام",
       email: `${message?.from?.id ?? message?.chat?.id ?? "telegram"}@telegram.local`,
@@ -137,10 +154,10 @@ function replyFor(text: string, message?: TelegramMessage) {
     });
     const hub = plan.hubs[0];
     const mentor = plan.mentors[0];
-    return `مسیر پیشنهادی تو: ${plan.track}\n\nاولین تمرین: ${plan.firstVideo.title}\nمنبع: ${plan.firstVideo.source}\n\nنقطه آموزشی پیشنهادی: ${hub.title}\nهزینه فضا: ${hub.coworkingCost}\n\nمربی پیشنهادی: ${mentor.name}\n${mentor.specialty}\n\nبرنامه دو روزه:\n${plan.twoDayProgram.map((item) => `• ${item.day}: ${item.title}`).join("\n")}\n\nبرای نسخه کامل و ذخیره برنامه: ${SITE_URL}/learning-plan`;
+    return `مسیر پیشنهادی تو: ${plan.track}\n\n۱) مسیر آموزشی:\nاولین تمرین: ${plan.firstVideo.title}\nمنبع: ${plan.firstVideo.source}\n\n۲) مسیر بازاریابی:\n${marketingPath}\n\n۳) نقطه آموزشی پیشنهادی:\n${hub.title}\nهزینه فضا: ${hub.coworkingCost}\n\n۴) مربی پیشنهادی:\n${mentor.name}\n${mentor.specialty}\n\n۵) وضعیت جلسه:\n${wantsTeam ? "برای جلسه حضوری، اگر ۴ نفر در همین منطقه آماده شوند هماهنگ می‌کنیم؛ تا آن زمان گروه تلگرام/آنلاین فعال است." : "فعلاً آنلاین/هیبرید پیشنهاد می‌شود؛ اگر ۴ نفر در منطقه تو تکمیل شود، حضوری می‌کنیم."}\n\nبرنامه دو روزه:\n${plan.twoDayProgram.map((item) => `• ${item.day}: ${item.title}`).join("\n")}\n\nبرای ثبت رسمی و ذخیره کامل: ${SITE_URL}/apply?source=telegram&utm_source=telegram&utm_medium=bot&utm_campaign=ai_internship`;
   }
 
-  return "متن کوتاهه. برای ساخت مسیر، یک رزومه/معرفی حداقل چند خطی بفرست: مهارت‌ها، تجربه، شهر/محله و هدفت.";
+  return `متن کوتاهه. برای ساخت مسیر منظم، این سوال‌ها را جواب بده:\n\n${starterQuestions("شروع")}`;
 }
 
 async function telegram(method: string, payload: Record<string, unknown>) {
