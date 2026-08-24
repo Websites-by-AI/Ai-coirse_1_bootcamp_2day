@@ -51,13 +51,13 @@ export function getRuntimeStatus(options?: {
         "سایت باز است، ولی ورود/ثبت‌نام/پنل بدون دیتابیس ذخیره نمی‌شود.",
       fix: "در Vercel → Settings → Environment Variables مقدار DATABASE_URL (Supabase) را بگذارید.",
     });
-  } else if (databaseReachable === false) {
+  } else if (postgresConfigured && databaseReachable === false && cloudflareD1Reachable !== true) {
     issues.push({
       id: "database_unreachable",
       severity: "critical",
       title: "اتصال دیتابیس ناموفق است",
       detail: "DATABASE_URL هست، ولی PostgreSQL در دسترس نیست.",
-      fix: "Connection string سوپابیس (pooler port 6543) و DATABASE_SSL=true را بررسی کنید.",
+      fix: "Connection string سوپابیس (pooler port 6543) و DATABASE_SSL=true را بررسی کنید. اگر روی Cloudflare هستید، اتصال D1 با binding VIBELAB_DB کافی است.",
     });
   }
 

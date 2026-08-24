@@ -31,8 +31,8 @@ export async function GET() {
       site: "up",
       database: {
         configured: isDatabaseConfigured || cloudflareD1Reachable,
-        provider: isDatabaseConfigured ? "postgres" : cloudflareD1Reachable ? "cloudflare-d1" : null,
-        reachable: isDatabaseConfigured ? databaseReachable : cloudflareD1Reachable,
+        provider: cloudflareD1Reachable ? "cloudflare-d1" : isDatabaseConfigured ? "postgres" : null,
+        reachable: cloudflareD1Reachable || (isDatabaseConfigured ? databaseReachable : false),
         postgres: {
           configured: isDatabaseConfigured,
           reachable: databaseReachable,

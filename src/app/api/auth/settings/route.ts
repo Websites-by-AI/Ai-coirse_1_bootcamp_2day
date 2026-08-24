@@ -27,6 +27,10 @@ export async function GET(request: NextRequest) {
     cloudflareD1Reachable,
   });
   const status = getAuthSettingsStatus(requestOrigin(request));
+  if (cloudflareD1Reachable) {
+    status.databaseConfigured = true;
+    status.setupHints = status.setupHints.filter((hint) => !hint.includes("DATABASE_URL"));
+  }
 
   return NextResponse.json({
     ok: true,
