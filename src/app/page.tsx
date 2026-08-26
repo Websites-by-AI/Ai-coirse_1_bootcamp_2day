@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import HomeClient from "./home-client";
+import WordPressHome from "./wordpress-home";
 
 export const metadata: Metadata = {
   title: "VibeLab | ماراتن ۲ روزه ساخت محتوا و وب‌اپ با AI",
@@ -69,5 +69,5 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <HomeClient />;
+  return <WordPressHome />;
 }
