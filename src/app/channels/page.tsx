@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { channelTypes } from "@/lib/channel-types";
 
 export const metadata: Metadata = {
   title: "کانال‌ها و ربات‌های VibeLab | تلگرام و بله",
@@ -73,6 +74,13 @@ export default function ChannelsPage() {
             {item.url.startsWith("http") ? <a href={item.url} target="_blank" rel="noreferrer">باز کردن</a> : <a href={item.url}>جزئیات اتصال</a>}
           </article>
         ))}
+      </section>
+
+      <section className="channels-container channel-types-section">
+        <p>CHANNEL TYPES</p>
+        <h2>تیپ محتوای کانال VibeLab</h2>
+        <span>پست‌های خودکار کانال به‌صورت چرخشی از این تیپ‌ها ساخته می‌شوند تا کانال فقط تبلیغاتی نباشد.</span>
+        <div>{channelTypes.map((item) => <article key={item.id}><b>{item.emoji} {item.title}</b><p>{item.description}</p></article>)}</div>
       </section>
 
       <section className="channels-container telegram-skills-section">

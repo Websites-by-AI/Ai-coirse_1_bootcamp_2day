@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getVibelabD1 } from "@/lib/cloudflare-d1";
+import { channelType, channelTypes, type ChannelTypeId } from "@/lib/channel-types";
 
 export const dynamic = "force-dynamic";
 
@@ -8,31 +9,13 @@ const CHANNEL_URL = "https://t.me/vibelab_channel";
 const SITE_URL = "https://v2.vibelab.ir";
 
 const postTemplates = [
-  {
-    title: "مسیر امروز VibeLab",
-    text: "اگر می‌خواهی با AI وارد بازار کار شوی، از رزومه شروع کن. رزومه‌ات را وارد کن تا مسیر آموزش، ویدیو، مربی و نقطه آموزشی پیشنهادی بگیری.",
-    cta: `${SITE_URL}/learning-plan`,
-  },
-  {
-    title: "کارآموزی طراحی سایت با AI",
-    text: "در VibeLab می‌توانی با مدل کارآموزی نقطه‌ای، ساخت لندینگ و سایت معرفی را تمرین کنی. ۳۰ دقیقه اول آشنایی رایگان است و بعد هزینه فضای کار اشتراکی با کارآموز است.",
-    cta: `${SITE_URL}/internship`,
-  },
-  {
-    title: "کارآموزی تولید محتوا با AI",
-    text: "از سناریو و کپشن تا ویدیو کوتاه و تقویم محتوا؛ مسیر تولید محتوا با AI برای ساخت نمونه‌کار واقعی طراحی شده است.",
-    cta: `${SITE_URL}/internship`,
-  },
-  {
-    title: "MASIR — از رزومه تا اولین پروژه",
-    text: "مسیر پنج مرحله دارد: تحلیل رزومه، دوره هدفمند، معلم محلی مثل اسنپ، مدرک معتبر و اتصال به بازار کار ایران و جهان.",
-    cta: `${SITE_URL}/masir`,
-  },
-  {
-    title: "ربات VibeLab",
-    text: "داخل ربات تلگرام، یک معرفی کوتاه از خودت بفرست تا مسیر آموزشی، نقطه پیشنهادی، مربی و برنامه دو روزه را خلاصه دریافت کنی.",
-    cta: "https://t.me/ai_vibelab_bot",
-  },
+  { category: "career" as ChannelTypeId, title: "مسیر امروز VibeLab", text: "اگر می‌خواهی با AI وارد بازار کار شوی، از رزومه شروع کن. رزومه‌ات را وارد کن تا مسیر آموزش، ویدیو، مربی و نقطه آموزشی پیشنهادی بگیری.", cta: `${SITE_URL}/learning-plan` },
+  { category: "internship" as ChannelTypeId, title: "کارآموزی طراحی سایت با AI", text: "در VibeLab می‌توانی با مدل کارآموزی نقطه‌ای، ساخت لندینگ و سایت معرفی را تمرین کنی. ۳۰ دقیقه اول آشنایی رایگان است و بعد هزینه فضای کار اشتراکی با کارآموز است.", cta: `${SITE_URL}/internship` },
+  { category: "learning" as ChannelTypeId, title: "کارآموزی تولید محتوا با AI", text: "از سناریو و کپشن تا ویدیو کوتاه و تقویم محتوا؛ مسیر تولید محتوا با AI برای ساخت نمونه‌کار واقعی طراحی شده است.", cta: `${SITE_URL}/internship` },
+  { category: "career" as ChannelTypeId, title: "MASIR — از رزومه تا اولین پروژه", text: "مسیر پنج مرحله دارد: تحلیل رزومه، دوره هدفمند، معلم محلی مثل اسنپ، مدرک معتبر و اتصال به بازار کار ایران و جهان.", cta: `${SITE_URL}/masir` },
+  { category: "mentor" as ChannelTypeId, title: "مدرسه اسنپی VibeLab", text: "دانش‌آموز، مربی و مدرسه/فضای آموزشی را مثل اسنپ به هم وصل می‌کنیم؛ هزینه فضا و مربی شفاف است.", cta: `${SITE_URL}/school-snap` },
+  { category: "project" as ChannelTypeId, title: "پروژه مشتری این هفته", text: "یک پروژه قابل فروش انتخاب کن: لندینگ کلینیک، سایت آموزشگاه، فروشگاه محلی، محتوا برای رستوران یا بات سفارش تلگرام.", cta: `${SITE_URL}/internship-desk` },
+  { category: "announcement" as ChannelTypeId, title: "ربات VibeLab", text: "داخل ربات تلگرام، یک معرفی کوتاه از خودت بفرست تا مسیر آموزشی، نقطه پیشنهادی، مربی و برنامه دو روزه را خلاصه دریافت کنی.", cta: "https://t.me/ai_vibelab_bot" },
 ];
 
 function botToken() {
@@ -43,7 +26,7 @@ function postSecret() {
   return process.env.TELEGRAM_CHANNEL_POST_SECRET?.trim() || process.env.TELEGRAM_WEBHOOK_SECRET?.trim();
 }
 
-function formatPost(template: (typeof postTemplates)[number]) {
+function formatPost(template: { title: string; text: string; cta: string }) {
   return `🚀 ${template.title}\n\n${template.text}\n\n🔗 ${template.cta}\n\n#VibeLab #AI #کارآموزی #رزومه #مسیر`;
 }
 
@@ -56,22 +39,24 @@ async function ensureTable() {
     title TEXT NOT NULL,
     body TEXT NOT NULL,
     cta_url TEXT,
+    category TEXT,
     telegram_message_id INTEGER,
     status TEXT NOT NULL DEFAULT 'draft',
     error TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     posted_at TEXT
   )`).run();
+  await db.prepare("ALTER TABLE vibelab_channel_posts ADD COLUMN category TEXT").run().catch(() => null);
   return db;
 }
 
-async function logPost(input: { title: string; body: string; ctaUrl?: string; messageId?: number; status: string; error?: string }) {
+async function logPost(input: { title: string; body: string; category?: string; ctaUrl?: string; messageId?: number; status: string; error?: string }) {
   try {
     const db = await ensureTable();
     if (!db) return;
     await db
-      .prepare("INSERT INTO vibelab_channel_posts (channel_id, title, body, cta_url, telegram_message_id, status, error, posted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(CHANNEL_ID, input.title, input.body, input.ctaUrl ?? null, input.messageId ?? null, input.status, input.error ?? null, input.status === "posted" ? new Date().toISOString() : null)
+      .prepare("INSERT INTO vibelab_channel_posts (channel_id, title, body, cta_url, category, telegram_message_id, status, error, posted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(CHANNEL_ID, input.title, input.body, input.ctaUrl ?? null, input.category ?? null, input.messageId ?? null, input.status, input.error ?? null, input.status === "posted" ? new Date().toISOString() : null)
       .run();
   } catch {
     // Ignore logging failures.
@@ -110,7 +95,8 @@ export async function GET() {
     channelUrl: CHANNEL_URL,
     botConfigured: Boolean(botToken()),
     postingSecretConfigured: Boolean(postSecret()),
-    templates: postTemplates.map((item) => ({ title: item.title, cta: item.cta })),
+    channelTypes,
+    templates: postTemplates.map((item) => ({ title: item.title, category: item.category, cta: item.cta })), 
     note: "POST to this endpoint with x-vibelab-channel-secret to publish. Use dryRun=true to preview.",
   });
 }
@@ -118,27 +104,31 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   if (!checkAuth(request)) return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
 
-  const body = (await request.json().catch(() => ({}))) as { templateIndex?: number; title?: string; text?: string; cta?: string; dryRun?: boolean };
-  const template = typeof body.templateIndex === "number" ? postTemplates[Math.abs(body.templateIndex) % postTemplates.length] : null;
+  const body = (await request.json().catch(() => ({}))) as { templateIndex?: number; category?: string; title?: string; text?: string; cta?: string; dryRun?: boolean };
+  const category = channelType(body.category).id;
+  const categoryTemplate = postTemplates.find((item) => item.category === category);
+  const dailyTemplate = postTemplates[new Date().getDate() % postTemplates.length];
+  const template = typeof body.templateIndex === "number" ? postTemplates[Math.abs(body.templateIndex) % postTemplates.length] : categoryTemplate ?? dailyTemplate;
   const selected = {
-    title: body.title?.trim() || template?.title || postTemplates[new Date().getDate() % postTemplates.length].title,
-    text: body.text?.trim() || template?.text || postTemplates[new Date().getDate() % postTemplates.length].text,
-    cta: body.cta?.trim() || template?.cta || postTemplates[new Date().getDate() % postTemplates.length].cta,
+    title: body.title?.trim() || template.title,
+    text: body.text?.trim() || template.text,
+    cta: body.cta?.trim() || template.cta,
+    category: body.category || template.category,
   };
   const postText = formatPost({ title: selected.title, text: selected.text, cta: selected.cta });
 
   if (body.dryRun) {
-    await logPost({ title: selected.title, body: postText, ctaUrl: selected.cta, status: "dry_run" });
+    await logPost({ title: selected.title, body: postText, category: selected.category, ctaUrl: selected.cta, status: "dry_run" });
     return NextResponse.json({ ok: true, dryRun: true, channel: CHANNEL_ID, text: postText });
   }
 
   try {
     const messageId = await sendChannelPost(postText);
-    await logPost({ title: selected.title, body: postText, ctaUrl: selected.cta, messageId: messageId ?? undefined, status: "posted" });
+    await logPost({ title: selected.title, body: postText, category: selected.category, ctaUrl: selected.cta, messageId: messageId ?? undefined, status: "posted" });
     return NextResponse.json({ ok: true, channel: CHANNEL_ID, messageId });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Telegram post failed";
-    await logPost({ title: selected.title, body: postText, ctaUrl: selected.cta, status: "failed", error: message });
+    await logPost({ title: selected.title, body: postText, category: selected.category, ctaUrl: selected.cta, status: "failed", error: message });
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }
