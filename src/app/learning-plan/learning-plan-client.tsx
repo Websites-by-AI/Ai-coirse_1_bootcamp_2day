@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import type { LearningHub, LearningResource, MentorProfile } from "@/lib/learning-data";
+import type { ResumeRagInsight } from "@/lib/resume-rag";
 
 type Plan = {
   track: string;
@@ -11,6 +12,7 @@ type Plan = {
   hubs: LearningHub[];
   mentors: MentorProfile[];
   twoDayProgram: { day: string; title: string; output: string }[];
+  rag?: ResumeRagInsight;
 };
 
 export default function LearningPlanClient() {
@@ -67,6 +69,7 @@ export default function LearningPlanClient() {
       {plan && (
         <div className="learning-result">
           <div className="learning-summary"><span>مسیر پیشنهادی</span><h2>{plan.track}</h2><p>{plan.summary}</p></div>
+          {plan.rag && <section className="rag-insight"><div className="rag-insight-head"><span>{plan.rag.provider === "huggingface_rag" ? "HF RAG فعال" : "RAG داخلی فعال"}</span><h3>تحلیل شخصی‌سازی‌شده رزومه</h3>{plan.rag.model && <small>{plan.rag.model}</small>}</div><p>{plan.rag.summary}</p><div className="rag-columns"><article><b>نقاط قوت</b>{plan.rag.strengths.map((item) => <span key={item}>{item}</span>)}</article><article><b>موارد تکمیل</b>{plan.rag.gaps.map((item) => <span key={item}>{item}</span>)}</article><article><b>قدم بعدی</b>{plan.rag.nextActions.map((item) => <span key={item}>{item}</span>)}</article></div><small className="rag-source-note">منابع بازیابی‌شده: {plan.rag.retrievedSources.map((item) => item.title).join("، ")}</small></section>}
           <article className="first-video"><p>اولین ویدیو پیشنهادی</p><h3>{plan.firstVideo.title}</h3><span>{plan.firstVideo.source} · {plan.firstVideo.level}</span><a href={plan.firstVideo.url} target="_blank" rel="noreferrer">دیدن ویدیو/منبع</a></article>
           <section><h3>منابع آموزشی پیشنهادی</h3><div className="resource-grid">{plan.resources.map((item) => <a key={item.url} href={item.url} target="_blank" rel="noreferrer"><b>{item.title}</b><small>{item.source} · {item.level}</small><p>{item.reason}</p></a>)}</div></section>
           <section><h3>برنامه دو روزه در مدل اسنپ آموزشی</h3><div className="program-grid">{plan.twoDayProgram.map((item) => <article key={item.day}><b>{item.day}</b><h4>{item.title}</h4><p>{item.output}</p></article>)}</div></section>

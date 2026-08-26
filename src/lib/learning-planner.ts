@@ -1,4 +1,5 @@
 import { getVibelabD1 } from "@/lib/cloudflare-d1";
+import { analyzeResumeWithRag, type ResumeRagInsight } from "@/lib/resume-rag";
 import { baseResources, learningHubs, mentors, type LearningResource } from "@/lib/learning-data";
 
 export type LearningPlanInput = {
@@ -115,12 +116,14 @@ export async function createLearningPlan(input: LearningPlanInput) {
   if (resumeText.length < 60) throw new Error("رزومه یا معرفی کوتاه را کامل‌تر وارد کنید.");
 
   const plan = generateLearningPlan({ ...input, fullName, email, phone, resumeText });
+  const rag = await analyzeResumeWithRag({ fullName, resumeText, goal: input.goal, cityPreference: input.cityPreference });
+  const enrichedPlan = { ...plan, rag };
   const db = await ensureLearningPlanTable();
   if (db) {
     await db
       .prepare("INSERT INTO vibelab_learning_plans (full_name, email, phone, goal, city_preference, resume_text, recommended_track, plan_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-      .bind(fullName, email, phone, input.goal, input.cityPreference || null, resumeText.slice(0, 5000), plan.track, JSON.stringify(plan))
+      .bind(fullName, email, phone, input.goal, input.cityPreference || null, resumeText.slice(0, 5000), plan.track, JSON.stringify(enrichedPlan))
       .run();
   }
-  return plan;
+  return enrichedPlan;
 }
