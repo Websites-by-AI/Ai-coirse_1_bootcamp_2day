@@ -69,8 +69,6 @@ async function logTelegramEvent(update: TelegramUpdate, command: string | null) 
 }
 
 async function mainKeyboard() {
-  const siteUrl = await getBotSiteUrl();
-  const channelUrl = await getBotChannelUrl();
   return {
     keyboard: [
       ["🧭 مسیر شغلی", "🧾 تحلیل رزومه"],
@@ -78,16 +76,23 @@ async function mainKeyboard() {
       ["📣 کانال و پست‌ها", "🎵 موسیقی AI"],
       ["🧑‍💻 کارتابل کارآموز", "🌐 لینک‌های سایت"],
     ],
-    inline_keyboard: [
-      [
-        { text: "ثبت‌نام در سایت", url: `${siteUrl}/register` },
-        { text: "کانال آموزش", url: channelUrl },
-      ],
-    ],
     resize_keyboard: true,
     persistent: true,
     one_time_keyboard: false,
     input_field_placeholder: "رزومه یا یکی از دکمه‌های پایین را انتخاب کن...",
+  };
+}
+
+async function linkKeyboard() {
+  const siteUrl = await getBotSiteUrl();
+  const channelUrl = await getBotChannelUrl();
+  return {
+    inline_keyboard: [
+      [
+        { text: "ثبت‌نام در سایت ↗", url: `${siteUrl}/register` },
+        { text: "کانال آموزش ↗", url: channelUrl },
+      ],
+    ],
   };
 }
 
@@ -185,6 +190,15 @@ async function sendMessage(chatId: number, text: string, withKeyboard = true) {
   });
 }
 
+async function sendLinkButtons(chatId: number) {
+  await telegram("sendMessage", {
+    chat_id: chatId,
+    text: "دسترسی سریع — فقط اگر می‌خواهی از سایت یا کانال ادامه بدهی:",
+    reply_markup: await linkKeyboard(),
+    disable_web_page_preview: true,
+  });
+}
+
 async function answerCallbackQuery(callbackQueryId: string) {
   await telegram("answerCallbackQuery", { callback_query_id: callbackQueryId });
 }
@@ -230,7 +244,10 @@ export async function POST(request: NextRequest) {
   const command = text.trim().startsWith("/") ? text.trim().split(/\s+/)[0].toLowerCase() : null;
 
   await logTelegramEvent(update, command);
-  if (typeof chatId === "number") await sendMessage(chatId, await replyFor(text, message), true);
+  if (typeof chatId === "number") {
+    await sendMessage(chatId, await replyFor(text, message), true);
+    if (command === "/start" || command === "/menu") await sendLinkButtons(chatId);
+  }
 
   return Response.json({ ok: true });
 }
