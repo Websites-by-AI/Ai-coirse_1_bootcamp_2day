@@ -60,6 +60,13 @@ export default function WordPressHome() {
         </div>
       </header>
 
+      <nav className="wp-mobile-links" aria-label="دسترسی سریع موبایل">
+        <Link href="/apply?source=mobile&utm_source=mobile&utm_medium=homepage&utm_campaign=internship">شروع کارآموزی</Link>
+        <Link href="/learning-plan">تحلیل رزومه</Link>
+        <Link href="/school-snap">مدرسه اسنپی</Link>
+        <Link href="https://t.me/ai_vibelab_bot" target="_blank">ربات تلگرام</Link>
+      </nav>
+
       <section className="wp-hero">
         <div className="wp-container wp-hero-grid">
           <div className="wp-hero-copy">
