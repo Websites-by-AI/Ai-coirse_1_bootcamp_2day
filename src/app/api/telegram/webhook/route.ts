@@ -3,6 +3,7 @@ import { getVibelabD1 } from "@/lib/cloudflare-d1";
 import { generateLearningPlan } from "@/lib/learning-planner";
 import { analyzeResumeWithRag } from "@/lib/resume-rag";
 import { getBotChannelUrl, getBotSiteUrl } from "@/lib/bot-settings";
+import { joinLocalGroup, listLocalGroups, type LocalGroup } from "@/lib/local-groups";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,12 @@ async function ensureTelegramTables() {
     command TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS vibelab_telegram_user_state (
+    chat_id INTEGER PRIMARY KEY,
+    interaction_count INTEGER NOT NULL DEFAULT 0,
+    channel_nudged INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`).run();
   return db;
 }
 
@@ -58,13 +65,26 @@ async function logTelegramEvent(update: TelegramUpdate, command: string | null) 
     const message = update.message ?? update.callback_query?.message;
     const user = update.message?.from ?? update.callback_query?.from;
     const text = update.message?.text ?? update.callback_query?.data ?? "";
-    if (!db || !message?.chat?.id) return;
+    if (!db || !message?.chat?.id) return false;
     await db
       .prepare("INSERT INTO vibelab_telegram_events (update_id, chat_id, username, first_name, text, command) VALUES (?, ?, ?, ?, ?, ?)")
       .bind(update.update_id ?? null, message.chat.id, user?.username ?? message.chat.username ?? null, user?.first_name ?? message.chat.first_name ?? null, text, command)
       .run();
+    await db
+      .prepare(`INSERT INTO vibelab_telegram_user_state (chat_id, interaction_count, updated_at)
+        VALUES (?, 1, ?)
+        ON CONFLICT(chat_id) DO UPDATE SET interaction_count = interaction_count + 1, updated_at = excluded.updated_at`)
+      .bind(message.chat.id, new Date().toISOString())
+      .run();
+    const state = await db.prepare("SELECT interaction_count, channel_nudged FROM vibelab_telegram_user_state WHERE chat_id = ?").bind(message.chat.id).first<{ interaction_count: number; channel_nudged: number }>();
+    if (state && state.interaction_count >= 3 && state.channel_nudged === 0) {
+      await db.prepare("UPDATE vibelab_telegram_user_state SET channel_nudged = 1, updated_at = ? WHERE chat_id = ?").bind(new Date().toISOString(), message.chat.id).run();
+      return true;
+    }
+    return false;
   } catch {
     // Logging should never break Telegram delivery.
+    return false;
   }
 }
 
@@ -84,13 +104,26 @@ function menuKeyboard() {
       [{ text: "🧭 مسیر شغلی", callback_data: "masir" }, { text: "🧾 تحلیل رزومه", callback_data: "resume_plan" }],
       [{ text: "🎓 کارآموزی", callback_data: "internship" }, { text: "🏫 مدرسه اسنپی", callback_data: "school_snap" }],
       [{ text: "💼 پروژه مشتری", callback_data: "client_project" }, { text: "📚 آموزش امروز", callback_data: "today_learning" }],
-      [{ text: "❔ راهنما", callback_data: "help" }],
+      [{ text: "👥 گروه محلی", callback_data: "local_groups" }, { text: "❔ راهنما", callback_data: "help" }],
     ],
   };
 }
 
 function backKeyboard() {
   return { inline_keyboard: [[{ text: "‹ بازگشت به منو", callback_data: "menu_home" }]] };
+}
+
+function groupKeyboard(groups: LocalGroup[]) {
+  return {
+    inline_keyboard: [
+      ...groups.map((group) => [{ text: `عضویت در ${group.title} · ${group.memberCount}/${group.capacity}`, callback_data: `group_join:${group.id}` }]),
+      [{ text: "‹ بازگشت به منو", callback_data: "menu_home" }],
+    ],
+  };
+}
+
+function formatGroups(groups: LocalGroup[]) {
+  return `گروه‌های محلی در حال تشکیل:\n\n${groups.map((group) => `• ${group.title}\n${group.track} · ${group.memberCount}/${group.capacity} نفر\n${group.status === "ready_for_coordination" ? "✅ آماده هماهنگی حضوری" : "⏳ در صف تکمیل گروه"}`).join("\n\n")}\n\nیک گروه را انتخاب کن. وقتی ظرفیت به ۴ نفر برسد، هماهنگ‌کننده زمان و فضای حضوری را اعلام می‌کند.`;
 }
 
 async function compactIntro() {
@@ -111,6 +144,7 @@ async function callbackReply(data?: string) {
   const channelUrl = await getBotChannelUrl();
   switch (data) {
     case "menu_home": return "یک بخش را انتخاب کن:";
+    case "local_groups": return formatGroups(await listLocalGroups());
     case "classified_start": return starterQuestions("آگهی دیوار/شیپور");
     case "starter_questions": return starterQuestions("شروع VibeLab");
     case "masir": return "MASIR یعنی از رزومه تا اولین پروژه:\n۱) تحلیل رزومه\n۲) دوره هدفمند\n۳) معلم محلی مثل اسنپ\n۴) مدرک معتبر\n۵) بازار کار ایران و جهان\n\nاگر می‌خوای مسیرت رو بسازم، یک رزومه/معرفی کوتاه همینجا بفرست.";
@@ -199,12 +233,22 @@ async function sendMenuPanel(chatId: number) {
   });
 }
 
-async function editMenuPanel(chatId: number, messageId: number, text: string, home = false) {
+async function editMenuPanel(chatId: number, messageId: number, text: string, home = false, customKeyboard?: Record<string, unknown>) {
   await telegram("editMessageText", {
     chat_id: chatId,
     message_id: messageId,
     text,
-    reply_markup: home ? menuKeyboard() : backKeyboard(),
+    reply_markup: customKeyboard ?? (home ? menuKeyboard() : backKeyboard()),
+    disable_web_page_preview: true,
+  });
+}
+
+async function sendChannelNudge(chatId: number) {
+  const channelUrl = await getBotChannelUrl();
+  await telegram("sendMessage", {
+    chat_id: chatId,
+    text: "برای دریافت تمرین‌های روزانه، فرصت‌های کارآموزی و زمان جلسات گروهی، به کانال آموزش VibeLab هم ملحق شو.",
+    reply_markup: { inline_keyboard: [[{ text: "عضویت در کانال آموزش", url: channelUrl }]] },
     disable_web_page_preview: true,
   });
 }
@@ -243,11 +287,24 @@ export async function POST(request: NextRequest) {
     const chatId = callback.message?.chat?.id;
     const messageId = callback.message?.message_id;
     const command = callback.data ? `callback:${callback.data}` : "callback";
-    await logTelegramEvent(update, command);
+    const suggestChannel = await logTelegramEvent(update, command);
     await answerCallbackQuery(callback.id);
     if (typeof chatId === "number" && typeof messageId === "number") {
-      await editMenuPanel(chatId, messageId, await callbackReply(callback.data), callback.data === "menu_home");
+      if (callback.data?.startsWith("group_join:")) {
+        const groupId = callback.data.slice("group_join:".length);
+        const group = await joinLocalGroup({ groupId, chatId, username: callback.from?.username, firstName: callback.from?.first_name });
+        const status = group.status === "ready_for_coordination"
+          ? "✅ گروه کامل شد؛ درخواست هماهنگی جلسه حضوری برای مدیر ثبت می‌شود."
+          : `⏳ درخواست عضویت ثبت شد. گروه اکنون ${group.memberCount}/${group.capacity} نفر است؛ تا تکمیل ظرفیت، آموزش آنلاین/گفت‌وگوی کوتاه فعال می‌ماند.`;
+        await editMenuPanel(chatId, messageId, `${group.title}\n${group.track}\n\n${status}`, false);
+      } else if (callback.data === "local_groups") {
+        const groups = await listLocalGroups();
+        await editMenuPanel(chatId, messageId, formatGroups(groups), false, groupKeyboard(groups));
+      } else {
+        await editMenuPanel(chatId, messageId, await callbackReply(callback.data), callback.data === "menu_home");
+      }
     }
+    if (suggestChannel && typeof chatId === "number") await sendChannelNudge(chatId);
     return Response.json({ ok: true });
   }
 
@@ -256,13 +313,14 @@ export async function POST(request: NextRequest) {
   const text = message?.text ?? "";
   const command = text.trim().startsWith("/") ? text.trim().split(/\s+/)[0].toLowerCase() : null;
 
-  await logTelegramEvent(update, command);
+  const suggestChannel = await logTelegramEvent(update, command);
   if (typeof chatId === "number") {
     if (text.includes("باز کردن منو") || command === "/menu") {
       await sendMenuPanel(chatId);
     } else {
       await sendMessage(chatId, await replyFor(text, message), true);
     }
+    if (suggestChannel) await sendChannelNudge(chatId);
   }
 
   return Response.json({ ok: true });
