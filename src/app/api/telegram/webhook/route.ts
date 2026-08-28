@@ -68,19 +68,29 @@ async function logTelegramEvent(update: TelegramUpdate, command: string | null) 
   }
 }
 
-async function mainKeyboard() {
+function bottomKeyboard() {
   return {
-    keyboard: [
-      ["🧭 مسیر شغلی", "🧾 تحلیل رزومه"],
-      ["🎓 کارآموزی", "🏫 مدرسه اسنپی"],
-      ["💼 پروژه مشتری", "📚 آموزش امروز"],
-      ["❔ راهنما", "🔄 شروع دوباره"],
-    ],
+    keyboard: [["☰ باز کردن منو"]],
     resize_keyboard: true,
     persistent: true,
     one_time_keyboard: false,
-    input_field_placeholder: "رزومه یا یکی از دکمه‌های پایین را انتخاب کن...",
+    input_field_placeholder: "برای دیدن گزینه‌ها، منو را باز کن یا رزومه‌ات را بنویس...",
   };
+}
+
+function menuKeyboard() {
+  return {
+    inline_keyboard: [
+      [{ text: "🧭 مسیر شغلی", callback_data: "masir" }, { text: "🧾 تحلیل رزومه", callback_data: "resume_plan" }],
+      [{ text: "🎓 کارآموزی", callback_data: "internship" }, { text: "🏫 مدرسه اسنپی", callback_data: "school_snap" }],
+      [{ text: "💼 پروژه مشتری", callback_data: "client_project" }, { text: "📚 آموزش امروز", callback_data: "today_learning" }],
+      [{ text: "❔ راهنما", callback_data: "help" }],
+    ],
+  };
+}
+
+function backKeyboard() {
+  return { inline_keyboard: [[{ text: "‹ بازگشت به منو", callback_data: "menu_home" }]] };
 }
 
 async function compactIntro() {
@@ -100,6 +110,7 @@ async function callbackReply(data?: string) {
   const siteUrl = await getBotSiteUrl();
   const channelUrl = await getBotChannelUrl();
   switch (data) {
+    case "menu_home": return "یک بخش را انتخاب کن:";
     case "classified_start": return starterQuestions("آگهی دیوار/شیپور");
     case "starter_questions": return starterQuestions("شروع VibeLab");
     case "masir": return "MASIR یعنی از رزومه تا اولین پروژه:\n۱) تحلیل رزومه\n۲) دوره هدفمند\n۳) معلم محلی مثل اسنپ\n۴) مدرک معتبر\n۵) بازار کار ایران و جهان\n\nاگر می‌خوای مسیرت رو بسازم، یک رزومه/معرفی کوتاه همینجا بفرست.";
@@ -107,6 +118,9 @@ async function callbackReply(data?: string) {
     case "internship": return "مدل اسنپی کارآموزی VibeLab:\n\n۱) رزومه/معرفی کوتاه می‌فرستی.\n۲) AI مسیرت را مشخص می‌کند.\n۳) دو مسیر می‌گیری: مسیر آموزشی + مسیر بازاریابی و گرفتن پروژه.\n۴) نزدیک‌ترین نقطه آموزشی پیشنهاد می‌شود.\n۵) اگر در یک نقطه ۴ نفر تکمیل شوند، حضوری؛ در غیر این صورت آنلاین/هیبرید یا گفت‌وگوی کوتاه انسانی در گروه تلگرام.\n\nبرای شروع، همینجا رزومه کوتاهت را بفرست یا /learning را بزن.";
     case "school_snap": return `مدرسه اسنپی VibeLab:\nدانش‌آموز، مربی و مدرسه را به هم وصل می‌کند؛ هزینه مربی و فضا شفاف است.\n\nلینک کامل: ${siteUrl}/school-snap`;
     case "channel": return `کانال VibeLab News برای پست‌های خودکار آموزش و کارآموزی فعال است:\n${channelUrl}`;
+    case "client_project": return "پروژه مشتری این هفته:\n• لندینگ کلینیک\n• سایت آموزشگاه\n• فروشگاه محلی\n• Content Kit رستوران\n• بات ثبت سفارش\n\nرزومه یا مهارت‌هایت را بفرست تا مناسب‌ترین پروژه را پیشنهاد بدهم.";
+    case "today_learning": return "آموزش امروز:\nیک Hero، یک CTA و یک فرم ثبت سفارش برای لندینگ پروژه‌ات بساز. بعد در چت بنویس: «تسک لندینگ انجام شد».";
+    case "help": return "راهنما:\nمسیر شغلی = تعیین مسیر از رزومه\nتحلیل رزومه = ارسال معرفی کوتاه\nکارآموزی = مدل گروه ۴ نفره\nمدرسه اسنپی = مربی و فضای نزدیک\nپروژه مشتری = ایده قابل فروش\nآموزش امروز = تمرین کوتاه روزانه\n\nبرای سایت، دکمه Menu بالای چت را بزن.";
     case "music": return "ماژول AI Music در حال آماده‌سازی است. گزینه‌های امن‌تر: ACE-Step/HuggingFace، fal.ai، WaveSpeed و MiniMax.";
     default: return compactIntro();
   }
@@ -171,7 +185,26 @@ async function sendMessage(chatId: number, text: string, withKeyboard = true) {
   await telegram("sendMessage", {
     chat_id: chatId,
     text,
-    reply_markup: withKeyboard ? await mainKeyboard() : undefined,
+    reply_markup: withKeyboard ? bottomKeyboard() : undefined,
+    disable_web_page_preview: true,
+  });
+}
+
+async function sendMenuPanel(chatId: number) {
+  await telegram("sendMessage", {
+    chat_id: chatId,
+    text: "یک بخش را انتخاب کن:",
+    reply_markup: menuKeyboard(),
+    disable_web_page_preview: true,
+  });
+}
+
+async function editMenuPanel(chatId: number, messageId: number, text: string, home = false) {
+  await telegram("editMessageText", {
+    chat_id: chatId,
+    message_id: messageId,
+    text,
+    reply_markup: home ? menuKeyboard() : backKeyboard(),
     disable_web_page_preview: true,
   });
 }
@@ -208,10 +241,13 @@ export async function POST(request: NextRequest) {
   const callback = update.callback_query;
   if (callback) {
     const chatId = callback.message?.chat?.id;
+    const messageId = callback.message?.message_id;
     const command = callback.data ? `callback:${callback.data}` : "callback";
     await logTelegramEvent(update, command);
     await answerCallbackQuery(callback.id);
-    if (typeof chatId === "number") await sendMessage(chatId, await callbackReply(callback.data), true);
+    if (typeof chatId === "number" && typeof messageId === "number") {
+      await editMenuPanel(chatId, messageId, await callbackReply(callback.data), callback.data === "menu_home");
+    }
     return Response.json({ ok: true });
   }
 
@@ -222,7 +258,11 @@ export async function POST(request: NextRequest) {
 
   await logTelegramEvent(update, command);
   if (typeof chatId === "number") {
-    await sendMessage(chatId, await replyFor(text, message), true);
+    if (text.includes("باز کردن منو") || command === "/menu") {
+      await sendMenuPanel(chatId);
+    } else {
+      await sendMessage(chatId, await replyFor(text, message), true);
+    }
   }
 
   return Response.json({ ok: true });
