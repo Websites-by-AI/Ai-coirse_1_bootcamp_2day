@@ -73,8 +73,8 @@ async function mainKeyboard() {
     keyboard: [
       ["🧭 مسیر شغلی", "🧾 تحلیل رزومه"],
       ["🎓 کارآموزی", "🏫 مدرسه اسنپی"],
-      ["📣 کانال و پست‌ها", "🎵 موسیقی AI"],
-      ["🧑‍💻 کارتابل کارآموز", "🌐 لینک‌های سایت"],
+      ["💼 پروژه مشتری", "📚 آموزش امروز"],
+      ["❔ راهنما", "🔄 شروع دوباره"],
     ],
     resize_keyboard: true,
     persistent: true,
@@ -83,27 +83,13 @@ async function mainKeyboard() {
   };
 }
 
-async function linkKeyboard() {
-  const siteUrl = await getBotSiteUrl();
-  const channelUrl = await getBotChannelUrl();
-  return {
-    inline_keyboard: [
-      [
-        { text: "ثبت‌نام در سایت ↗", url: `${siteUrl}/register` },
-        { text: "کانال آموزش ↗", url: channelUrl },
-      ],
-    ],
-  };
-}
-
 async function compactIntro() {
-  const channelUrl = await getBotChannelUrl();
   return `سلام 👋
-من ربات VibeLab هستم. اینجا داخل خود تلگرام می‌تونم مسیر شغلی، کارآموزی، تحلیل رزومه و برنامه یادگیری رو خلاصه کنم.
+من ربات VibeLab هستم.
 
-کانال آموزش‌ها: ${channelUrl}
+از منوی پایین می‌تونی مسیر شغلی، تحلیل رزومه، کارآموزی، مدرسه اسنپی، پروژه مشتری یا آموزش امروز را انتخاب کنی.
 
-برای شروع یکی از گزینه‌های پایین را بزن؛ لینک‌ها فقط وقتی لازم باشد نمایش داده می‌شوند.`;
+برای ورود به سایت از دکمه Menu تلگرام استفاده کن؛ لینک‌ها داخل چت تکرار نمی‌شوند.`;
 }
 
 function starterQuestions(source = "آگهی") {
@@ -129,7 +115,6 @@ async function callbackReply(data?: string) {
 async function replyFor(text: string, message?: TelegramMessage) {
   const normalized = text.trim().toLowerCase();
   const siteUrl = await getBotSiteUrl();
-  const channelUrl = await getBotChannelUrl();
   if (normalized.startsWith("/start") || normalized.startsWith("/menu")) return compactIntro();
   if (normalized.startsWith("/help")) {
     return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/divar سوالات مخصوص ورودی دیوار/شیپور\n/internship کارآموزی\n/school مدرسه اسنپی دانش‌آموز و مربی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
@@ -138,10 +123,11 @@ async function replyFor(text: string, message?: TelegramMessage) {
   if (normalized.startsWith("/internship") || text.includes("کارآموزی")) return await callbackReply("internship");
   if (normalized.startsWith("/school") || text.includes("مدرسه اسنپی")) return await callbackReply("school_snap");
   if (normalized.startsWith("/learning") || normalized.startsWith("/masir") || text.includes("تحلیل رزومه") || text.includes("مسیر شغلی")) return await callbackReply("resume_plan");
+  if (text.includes("پروژه مشتری")) return "پروژه مشتری این هفته:\n• لندینگ کلینیک\n• سایت آموزشگاه\n• فروشگاه محلی\n• Content Kit رستوران\n• بات ثبت سفارش\n\nرزومه یا مهارت‌هایت را بفرست تا مناسب‌ترین پروژه را پیشنهاد بدهم.";
+  if (text.includes("آموزش امروز")) return "آموزش امروز:\nیک ویدیوی کوتاه درباره ساخت لندینگ با AI ببین، سپس یک Hero، یک CTA و فرم ثبت سفارش برای پروژه‌ات طراحی کن.\n\nبعد از انجام، در همین چت بنویس: «تسک لندینگ انجام شد».";
+  if (text.includes("راهنما") || normalized.startsWith("/help")) return "راهنما:\n🧭 مسیر شغلی: تعیین مسیر از رزومه\n🧾 تحلیل رزومه: ارسال معرفی کوتاه\n🎓 کارآموزی: مدل گروه ۴ نفره\n🏫 مدرسه اسنپی: مربی و فضای نزدیک\n💼 پروژه مشتری: انتخاب پروژه قابل فروش\n📚 آموزش امروز: تمرین کوتاه روزانه\n\nبرای باز کردن سایت، از دکمه Menu بالای چت استفاده کن.";
+  if (text.includes("شروع دوباره")) return compactIntro();
   if (normalized.startsWith("/music") || text.includes("موسیقی")) return await callbackReply("music");
-  if (text.includes("کانال") || text.includes("پست")) return await callbackReply("channel");
-  if (text.includes("کارتابل")) return `کارتابل کارآموزی:\n${siteUrl}/internship-desk\n\nدر این صفحه تسک‌های هفتگی، ویدیوهای آموزشی، پروژه فروشگاهی، گروه ۴ نفره و فضای کار اشتراکی را می‌بینی.`;
-  if (text.includes("لینک")) return `لینک‌های مهم VibeLab:\nسایت: ${siteUrl}\nثبت‌نام: ${siteUrl}/register\nکارتابل: ${siteUrl}/internship-desk\nمدرسه اسنپی: ${siteUrl}/school-snap\nکانال: ${channelUrl}`;
   if (normalized.startsWith("/health")) return "وضعیت فعلی: سایت روی Cloudflare D1 فعال است ✅";
 
   if (text.trim().length >= 60) {
@@ -186,15 +172,6 @@ async function sendMessage(chatId: number, text: string, withKeyboard = true) {
     chat_id: chatId,
     text,
     reply_markup: withKeyboard ? await mainKeyboard() : undefined,
-    disable_web_page_preview: true,
-  });
-}
-
-async function sendLinkButtons(chatId: number) {
-  await telegram("sendMessage", {
-    chat_id: chatId,
-    text: "دسترسی سریع — فقط اگر می‌خواهی از سایت یا کانال ادامه بدهی:",
-    reply_markup: await linkKeyboard(),
     disable_web_page_preview: true,
   });
 }
@@ -246,7 +223,6 @@ export async function POST(request: NextRequest) {
   await logTelegramEvent(update, command);
   if (typeof chatId === "number") {
     await sendMessage(chatId, await replyFor(text, message), true);
-    if (command === "/start" || command === "/menu") await sendLinkButtons(chatId);
   }
 
   return Response.json({ ok: true });
