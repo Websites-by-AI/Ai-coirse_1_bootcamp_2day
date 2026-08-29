@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getVibelabD1 } from "@/lib/cloudflare-d1";
 import { generateLearningPlan } from "@/lib/learning-planner";
 import { analyzeResumeWithRag } from "@/lib/resume-rag";
-import { getBotChannelUrl, getBotSiteUrl } from "@/lib/bot-settings";
+import { getBotChannelUrl } from "@/lib/bot-settings";
 import { joinLocalGroup, listLocalGroups, type LocalGroup } from "@/lib/local-groups";
 
 export const dynamic = "force-dynamic";
@@ -164,7 +164,6 @@ async function callbackReply(data?: string) {
 
 async function replyFor(text: string, message?: TelegramMessage) {
   const normalized = text.trim().toLowerCase();
-  const siteUrl = await getBotSiteUrl();
   if (normalized.startsWith("/start") || normalized.startsWith("/menu")) return compactIntro();
   if (normalized.startsWith("/help")) {
     return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/divar سوالات مخصوص ورودی دیوار/شیپور\n/internship کارآموزی\n/school مدرسه اسنپی دانش‌آموز و مربی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
@@ -203,7 +202,7 @@ async function replyFor(text: string, message?: TelegramMessage) {
     });
     const hub = plan.hubs[0];
     const mentor = plan.mentors[0];
-    return `مسیر پیشنهادی تو: ${plan.track}\n\nتحلیل RAG: ${rag.provider === "huggingface_rag" ? "HuggingFace فعال" : "منابع داخلی VibeLab"}\n${rag.summary}\n\n۱) مسیر آموزشی:\nاولین تمرین: ${plan.firstVideo.title}\nمنبع: ${plan.firstVideo.source}\n\n۲) مسیر بازاریابی:\n${marketingPath}\n\n۳) نقطه آموزشی پیشنهادی:\n${hub.title}\nهزینه فضا: ${hub.coworkingCost}\n\n۴) مربی پیشنهادی:\n${mentor.name}\n${mentor.specialty}\n\n۵) وضعیت جلسه:\n${wantsTeam ? "برای جلسه حضوری، اگر ۴ نفر در همین منطقه آماده شوند هماهنگ می‌کنیم؛ تا آن زمان گروه تلگرام/آنلاین فعال است." : "فعلاً آنلاین/هیبرید پیشنهاد می‌شود؛ اگر ۴ نفر در منطقه تو تکمیل شود، حضوری می‌کنیم."}\n\nبرنامه دو روزه:\n${plan.twoDayProgram.map((item) => `• ${item.day}: ${item.title}`).join("\n")}\n\nبرای ثبت رسمی و ذخیره کامل: ${siteUrl}/apply?source=telegram&utm_source=telegram&utm_medium=bot&utm_campaign=ai_internship`;
+    return `مسیر پیشنهادی تو: ${plan.track}\n\nتحلیل RAG: ${rag.provider === "huggingface_rag" ? "HuggingFace فعال" : "منابع داخلی VibeLab"}\n${rag.summary}\n\n۱) مسیر آموزشی:\nاولین تمرین: ${plan.firstVideo.title}\nمنبع: ${plan.firstVideo.source}\n\n۲) مسیر بازاریابی:\n${marketingPath}\n\n۳) نقطه آموزشی پیشنهادی:\n${hub.title}\nهزینه فضا: ${hub.coworkingCost}\n\n۴) مربی پیشنهادی:\n${mentor.name}\n${mentor.specialty}\n\n۵) وضعیت جلسه:\n${wantsTeam ? "برای جلسه حضوری، اگر ۴ نفر در همین منطقه آماده شوند هماهنگ می‌کنیم؛ تا آن زمان گروه تلگرام/آنلاین فعال است." : "فعلاً آنلاین/هیبرید پیشنهاد می‌شود؛ اگر ۴ نفر در منطقه تو تکمیل شود، حضوری می‌کنیم."}\n\nبرنامه دو روزه:\n${plan.twoDayProgram.map((item) => `• ${item.day}: ${item.title}`).join("\n")}\n\nبرای ادامه، از دکمه Menu تلگرام وارد سایت شو؛ لینک را داخل چت تکرار نمی‌کنم.`;
   }
 
   return `متن کوتاهه. برای ساخت مسیر منظم، این سوال‌ها را جواب بده:\n\n${starterQuestions("شروع")}`;
