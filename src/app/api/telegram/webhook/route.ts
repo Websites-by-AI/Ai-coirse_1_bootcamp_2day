@@ -101,10 +101,10 @@ function bottomKeyboard() {
 function menuKeyboard() {
   return {
     inline_keyboard: [
-      [{ text: "🧭 مسیر شغلی", callback_data: "masir" }, { text: "🧾 تحلیل رزومه", callback_data: "resume_plan" }],
-      [{ text: "🎓 کارآموزی", callback_data: "internship" }, { text: "🏫 مدرسه اسنپی", callback_data: "school_snap" }],
-      [{ text: "💼 پروژه مشتری", callback_data: "client_project" }, { text: "📚 آموزش امروز", callback_data: "today_learning" }],
-      [{ text: "👥 گروه محلی", callback_data: "local_groups" }, { text: "❔ راهنما", callback_data: "help" }],
+      [{ text: "🧾 تحلیل رزومه", callback_data: "resume_plan" }, { text: "🗓 دوره فشرده دو روزه", callback_data: "two_day" }],
+      [{ text: "📣 بازاریابی و گرفتن پروژه", callback_data: "marketing" }, { text: "📝 متن آماده مشتری", callback_data: "templates" }],
+      [{ text: "👥 گروه محلی ۴ نفره", callback_data: "local_groups" }, { text: "🏫 مربی و فضای نزدیک", callback_data: "school_snap" }],
+      [{ text: "❔ راهنما", callback_data: "help" }],
     ],
   };
 }
@@ -140,7 +140,6 @@ function starterQuestions(source = "آگهی") {
 }
 
 async function callbackReply(data?: string) {
-  const siteUrl = await getBotSiteUrl();
   const channelUrl = await getBotChannelUrl();
   switch (data) {
     case "menu_home": return "یک بخش را انتخاب کن:";
@@ -149,12 +148,15 @@ async function callbackReply(data?: string) {
     case "starter_questions": return starterQuestions("شروع VibeLab");
     case "masir": return "MASIR یعنی از رزومه تا اولین پروژه:\n۱) تحلیل رزومه\n۲) دوره هدفمند\n۳) معلم محلی مثل اسنپ\n۴) مدرک معتبر\n۵) بازار کار ایران و جهان\n\nاگر می‌خوای مسیرت رو بسازم، یک رزومه/معرفی کوتاه همینجا بفرست.";
     case "resume_plan": return "رزومه یا معرفی کوتاهت رو همینجا بفرست.\nمثلاً بنویس: مهارت‌ها، تجربه، علاقه به طراحی سایت یا تولید محتوا، شهر/محله و هدفت برای کار.";
-    case "internship": return "مدل اسنپی کارآموزی VibeLab:\n\n۱) رزومه/معرفی کوتاه می‌فرستی.\n۲) AI مسیرت را مشخص می‌کند.\n۳) دو مسیر می‌گیری: مسیر آموزشی + مسیر بازاریابی و گرفتن پروژه.\n۴) نزدیک‌ترین نقطه آموزشی پیشنهاد می‌شود.\n۵) اگر در یک نقطه ۴ نفر تکمیل شوند، حضوری؛ در غیر این صورت آنلاین/هیبرید یا گفت‌وگوی کوتاه انسانی در گروه تلگرام.\n\nبرای شروع، همینجا رزومه کوتاهت را بفرست یا /learning را بزن.";
-    case "school_snap": return `مدرسه اسنپی VibeLab:\nدانش‌آموز، مربی و مدرسه را به هم وصل می‌کند؛ هزینه مربی و فضا شفاف است.\n\nلینک کامل: ${siteUrl}/school-snap`;
-    case "channel": return `کانال VibeLab News برای پست‌های خودکار آموزش و کارآموزی فعال است:\n${channelUrl}`;
+    case "internship":
+    case "two_day": return "دوره فشرده دو روزه VibeLab:\n\nروز اول: ساخت سایت/لندینگ با AI، ساخت CTA، فرم سفارش و اتصال اولیه D1.\nروز دوم: تولید محتوا، SEO، آگهی دیوار/شیپور، پیام معرفی و برنامه جذب اولین مشتری.\n\nخروجی: یک نمونه‌کار زنده + متن معرفی + برنامه بازاریابی ۷ روزه.\n\nابتدا رزومه یا معرفی کوتاهت را بفرست تا مسیر مناسب خودت تنظیم شود.";
+    case "school_snap": return "مدل مدرسه اسنپی:\nسیستم بر اساس رزومه، هدف و شهر، مربی و نقطه نزدیک را پیشنهاد می‌دهد. هزینه مربی و فضای کار شفاف است. اگر یک گروه به ۴ نفر برسد، جلسه حضوری هماهنگ می‌شود؛ در غیر این صورت آنلاین/هیبرید است.";
+    case "channel": return `کانال VibeLab News برای آموزش‌ها، تسک‌ها و فرصت‌های کارآموزی فعال است: ${channelUrl}`;
     case "client_project": return "پروژه مشتری این هفته:\n• لندینگ کلینیک\n• سایت آموزشگاه\n• فروشگاه محلی\n• Content Kit رستوران\n• بات ثبت سفارش\n\nرزومه یا مهارت‌هایت را بفرست تا مناسب‌ترین پروژه را پیشنهاد بدهم.";
+    case "marketing": return "مسیر بازاریابی دو روزه:\n۱) انتخاب یک خدمت: سایت، محتوا یا بات سفارش.\n۲) ساخت نمونه‌کار زنده.\n۳) نوشتن پیام معرفی و قیمت اولیه.\n۴) انتشار آگهی/ارسال پیام به ۱۰ مشتری هدف.\n۵) پیگیری روزانه و ثبت نتیجه در کارتابل.";
+    case "templates": return "متن آماده برای مشتری:\n\nسلام، من در حال ساخت نمونه‌کارهای طراحی سایت و تولید محتوا با AI هستم. می‌توانم برای کسب‌وکار شما یک لندینگ ساده، فرم دریافت سفارش و محتوای اولیه آماده کنم. اگر مایل باشید یک پیشنهاد کوتاه و نمونه اولیه متناسب با کار شما ارسال می‌کنم.\n\nاین متن را با نام کسب‌وکار و خدمت موردنظر شخصی‌سازی کن.";
     case "today_learning": return "آموزش امروز:\nیک Hero، یک CTA و یک فرم ثبت سفارش برای لندینگ پروژه‌ات بساز. بعد در چت بنویس: «تسک لندینگ انجام شد».";
-    case "help": return "راهنما:\nمسیر شغلی = تعیین مسیر از رزومه\nتحلیل رزومه = ارسال معرفی کوتاه\nکارآموزی = مدل گروه ۴ نفره\nمدرسه اسنپی = مربی و فضای نزدیک\nپروژه مشتری = ایده قابل فروش\nآموزش امروز = تمرین کوتاه روزانه\n\nبرای سایت، دکمه Menu بالای چت را بزن.";
+    case "help": return "راهنما:\nتحلیل رزومه = مسیر شخصی‌سازی‌شده\nدوره دو روزه = سایت + بازاریابی\nبازاریابی = گرفتن اولین مشتری\nمتن آماده = پیام معرفی مشتری\nگروه محلی = تشکیل کلاس ۴ نفره\n\nبرای سایت، از Menu تلگرام استفاده کن.";
     case "music": return "ماژول AI Music در حال آماده‌سازی است. گزینه‌های امن‌تر: ACE-Step/HuggingFace، fal.ai، WaveSpeed و MiniMax.";
     default: return compactIntro();
   }
@@ -168,13 +170,15 @@ async function replyFor(text: string, message?: TelegramMessage) {
     return "دستورها:\n/start شروع\n/menu نمایش منوی ربات\n/divar سوالات مخصوص ورودی دیوار/شیپور\n/internship کارآموزی\n/school مدرسه اسنپی دانش‌آموز و مربی\n/learning تحلیل رزومه و مسیر آموزش\n/masir مسیر شغلی\n/music موسیقی AI\n/health وضعیت سایت";
   }
   if (normalized.startsWith("/divar") || normalized.startsWith("/sheypoor") || normalized.startsWith("/classified") || text.includes("دیوار") || text.includes("شیپور")) return starterQuestions("آگهی دیوار/شیپور");
-  if (normalized.startsWith("/internship") || text.includes("کارآموزی")) return await callbackReply("internship");
-  if (normalized.startsWith("/school") || text.includes("مدرسه اسنپی")) return await callbackReply("school_snap");
+  if (normalized.startsWith("/internship") || text.includes("کارآموزی") || text.includes("دوره فشرده")) return await callbackReply("two_day");
+  if (normalized.startsWith("/school") || text.includes("مدرسه اسنپی") || text.includes("مربی و فضای")) return await callbackReply("school_snap");
   if (normalized.startsWith("/learning") || normalized.startsWith("/masir") || text.includes("تحلیل رزومه") || text.includes("مسیر شغلی")) return await callbackReply("resume_plan");
-  if (text.includes("پروژه مشتری")) return "پروژه مشتری این هفته:\n• لندینگ کلینیک\n• سایت آموزشگاه\n• فروشگاه محلی\n• Content Kit رستوران\n• بات ثبت سفارش\n\nرزومه یا مهارت‌هایت را بفرست تا مناسب‌ترین پروژه را پیشنهاد بدهم.";
-  if (text.includes("آموزش امروز")) return "آموزش امروز:\nیک ویدیوی کوتاه درباره ساخت لندینگ با AI ببین، سپس یک Hero، یک CTA و فرم ثبت سفارش برای پروژه‌ات طراحی کن.\n\nبعد از انجام، در همین چت بنویس: «تسک لندینگ انجام شد».";
-  if (text.includes("راهنما") || normalized.startsWith("/help")) return "راهنما:\n🧭 مسیر شغلی: تعیین مسیر از رزومه\n🧾 تحلیل رزومه: ارسال معرفی کوتاه\n🎓 کارآموزی: مدل گروه ۴ نفره\n🏫 مدرسه اسنپی: مربی و فضای نزدیک\n💼 پروژه مشتری: انتخاب پروژه قابل فروش\n📚 آموزش امروز: تمرین کوتاه روزانه\n\nبرای باز کردن سایت، از دکمه Menu بالای چت استفاده کن.";
-  if (text.includes("شروع دوباره")) return compactIntro();
+  if (text.includes("گروه محلی")) return formatGroups(await listLocalGroups());
+  if (text.includes("بازاریابی")) return await callbackReply("marketing");
+  if (text.includes("متن آماده")) return await callbackReply("templates");
+  if (text.includes("پروژه مشتری")) return await callbackReply("client_project");
+  if (text.includes("آموزش امروز")) return await callbackReply("today_learning");
+  if (text.includes("راهنما") || normalized.startsWith("/help")) return await callbackReply("help");
   if (normalized.startsWith("/music") || text.includes("موسیقی")) return await callbackReply("music");
   if (normalized.startsWith("/health")) return "وضعیت فعلی: سایت روی Cloudflare D1 فعال است ✅";
 

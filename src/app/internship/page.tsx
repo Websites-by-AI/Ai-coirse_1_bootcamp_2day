@@ -26,11 +26,11 @@ const tracks = [
   },
 ];
 
-const weeks = [
-  { week: "هفته ۱", title: "آشنایی، مسیر بازار و انتخاب پروژه", text: "مسیر طراحی سایت یا تولید محتوا انتخاب می‌شود و مسئله واقعی برای نمونه‌کار تعریف می‌کنیم." },
-  { week: "هفته ۲", title: "Prompt System و تحقیق بازار", text: "با Claude/Gemini سیستم پرامپت برای ایده، متن، مخاطب و ساختار پروژه ساخته می‌شود." },
-  { week: "هفته ۳", title: "ساخت خروجی اولیه", text: "کارآموز سایت یا Content Kit اولیه را می‌سازد و بازخورد عملی می‌گیرد." },
-  { week: "هفته ۴", title: "انتشار، رزومه و معرفی به بازار", text: "خروجی نهایی منتشر می‌شود، رزومه و پیام معرفی آماده می‌شود و مسیر کاریابی شروع می‌شود." },
+const programBlocks = [
+  { week: "روز اول · صبح", title: "رزومه، بازار و نقشه لندینگ", text: "رزومه بررسی می‌شود، مشتری هدف انتخاب می‌شود و ساختار سایت، Hero، CTA و فرم سفارش طراحی می‌شود." },
+  { week: "روز اول · عصر", title: "Vibe Coding و ساخت سایت", text: "نسخه اولیه سایت/لندینگ با AI ساخته می‌شود و فرم دریافت لید به Cloudflare D1 وصل می‌شود." },
+  { week: "روز دوم · صبح", title: "محتوا، ویدیو و SEO", text: "کپشن، سناریو، مقاله SEO و محتوای معرفی برای پروژه و مشتری هدف تولید می‌شود." },
+  { week: "روز دوم · عصر", title: "بازاریابی و اولین مشتری", text: "پیام معرفی، قیمت اولیه، آگهی دیوار/شیپور و برنامه ۷ روزه پیگیری مشتری آماده می‌شود." },
 ];
 
 const expectations = [
@@ -48,8 +48,7 @@ export default function InternshipPage() {
           <div className="internship-kicker">VIBELAB INTERNSHIP + TRAINING</div>
           <h1>کارآموزی عملی طراحی سایت و تولید محتوا با هوش مصنوعی</h1>
           <p>
-            این برنامه برای کسانی است که می‌خواهند فقط آموزش نبینند؛ بلکه در چند هفته یک خروجی قابل ارائه بسازند:
-            سایت، محتوا، رزومه، نمونه‌کار و مسیر گرفتن پروژه.
+            این یک برنامه فشرده دو روزه است: روز اول سایت/لندینگ و فرم سفارش را می‌سازی؛ روز دوم محتوا، SEO، پیام معرفی و مسیر جذب اولین مشتری را آماده می‌کنی.
           </p>
           <div className="internship-actions">
             <Link href="/register">ثبت‌نام و سنجش مسیر</Link>
@@ -107,10 +106,10 @@ export default function InternshipPage() {
       <section className="internship-container internship-section">
         <div className="internship-section-head">
           <p>PROGRAM</p>
-          <h2>برنامه ۴ هفته‌ای پیشنهادی</h2>
+          <h2>برنامه فشرده دو روزه: سایت + بازاریابی</h2>
         </div>
         <div className="internship-week-list">
-          {weeks.map((item) => (
+          {programBlocks.map((item) => (
             <article key={item.week}>
               <b>{item.week}</b>
               <div>
